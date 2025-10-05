@@ -49,7 +49,7 @@ export function ConfirmationDialog({
           <p className='text-sm text-muted-foreground'>{description}</p>
         </DialogHeader>
         <DialogFooter>
-          <div className="flex gap-2 self-end">
+          <div className='flex gap-2 self-end'>
             <Button variant='outline' onClick={() => setOpen(false)}>
               {cancelText}
             </Button>
