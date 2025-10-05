@@ -49,12 +49,14 @@ export function ConfirmationDialog({
           <p className='text-sm text-muted-foreground'>{description}</p>
         </DialogHeader>
         <DialogFooter>
-          <Button variant='outline' onClick={() => setOpen(false)}>
-            {cancelText}
-          </Button>
-          <Button variant='destructive' onClick={handleConfirm}>
-            {confirmText}
-          </Button>
+          <div className="flex gap-2 self-end">
+            <Button variant='outline' onClick={() => setOpen(false)}>
+              {cancelText}
+            </Button>
+            <Button variant='destructive' onClick={handleConfirm}>
+              {confirmText}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
