@@ -113,7 +113,7 @@ export default function DisplayName() {
   const { canEdit, isLoading, profile } = useProfileContext();
 
   if (isLoading) {
-    return <Skeleton className='h-6' />;
+    return <Skeleton className='h-8' />;
   }
 
   if (canEdit) {
