@@ -14,7 +14,7 @@ export default function UserInfo() {
       {isLoading ? (
         <Skeleton className='w-24 h-24 rounded-full' />
       ) : (
-        <Avatar className='w-24 h-24'>
+        <Avatar className='w-24 h-24 border border-primary-600'>
           <AvatarImage src={profile.avatarUrl || ''} />
           <AvatarFallback>Avatar</AvatarFallback>
         </Avatar>
