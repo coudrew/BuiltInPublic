@@ -142,7 +142,7 @@ export default function Bio() {
 
   // Return the skeleton loader while loading
   if (isLoading) {
-    return <Skeleton className='h-6' />;
+    return <Skeleton className='h-10' />;
   }
 
   if (canEdit) {
