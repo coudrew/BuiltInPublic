@@ -12,7 +12,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
-CREATE EXTENSION IF NOT EXISTS "pgsodium";
+CREATE EXTENSION IF NOT EXISTS "pgsodium"; 
 
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
@@ -165,6 +165,32 @@ CREATE TABLE IF NOT EXISTS "public"."endorsements" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now ()
 );
 
+-- Create images table for storing metadata of uploaded files
+-- Each record corresponds to an image in the public storage bucket.
+-- Includes ownership (user_id), original filename, dimensions, file size,
+-- and optional alt text for accessibility.
+
+CREATE POLICY "Users can view own images"
+  ON public.images FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own images"
+  ON public.images FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own images"
+  ON public.images FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own images"
+  ON public.images FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
 -- Alter table to set owner to postgres
 ALTER TABLE "public"."posts" OWNER TO "postgres";
 
@@ -227,6 +253,28 @@ CREATE POLICY "Users can delete their own likes" ON "public"."likes" FOR DELETE 
 
 -- users
 CREATE POLICY "Anyone can view auth users" ON "auth"."users" FOR SELECT TO authenticated USING (true);
+
+-- images
+CREATE POLICY "Users can view own images"
+  ON public.images FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own images"
+  ON public.images FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own images"
+  ON public.images FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own images"
+  ON public.images FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
 
 -- Enable row level security for all tables
 ALTER TABLE "public"."likes" ENABLE ROW LEVEL SECURITY;
