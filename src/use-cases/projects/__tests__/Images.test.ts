@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SupabaseAnonClient } from 'utils/supabase/server';
 
 // ---------- Service client mock: "table exists" probe succeeds
-const svcSelect = vi.fn().mockResolvedValue({ data: null, error: null, status: 200 });
+const svcSelect = vi
+  .fn()
+  .mockResolvedValue({ data: null, error: null, status: 200 });
 const svcFrom = vi.fn().mockReturnThis();
 const svcClient = {
   from: svcFrom,
