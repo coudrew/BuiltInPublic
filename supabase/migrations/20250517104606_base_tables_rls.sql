@@ -12,7 +12,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
-CREATE EXTENSION IF NOT EXISTS "pgsodium"; 
+CREATE EXTENSION IF NOT EXISTS "pgsodium";
 
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
@@ -165,37 +165,29 @@ CREATE TABLE IF NOT EXISTS "public"."endorsements" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now ()
 );
 
--- Create images table for storing metadata of uploaded files
--- Each record corresponds to an image in the public storage bucket.
--- Includes ownership (user_id), original filename, dimensions, file size,
--- and optional alt text for accessibility.
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- NEW: Images table (metadata for files in Supabase Storage)
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+CREATE TABLE IF NOT EXISTS "public"."images" (
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+    "user_id" UUID NOT NULL REFERENCES public.profiles (id) ON DELETE CASCADE,
+    "bucket" TEXT NOT NULL DEFAULT 'public',
+    "path" TEXT NOT NULL,
+    "original_filename" TEXT NOT NULL,
+    "mime_type" TEXT NOT NULL,
+    "width" INTEGER,
+    "height" INTEGER,
+    "size_bytes" BIGINT,
+    "alt_text" TEXT,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT now (),
+    "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now (),
+    CONSTRAINT "images_bucket_path_unique" UNIQUE ("bucket", "path")
+);
 
-CREATE POLICY "Users can view own images"
-  ON public.images FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own images"
-  ON public.images FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own images"
-  ON public.images FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own images"
-  ON public.images FOR DELETE
-  TO authenticated
-  USING (auth.uid() = user_id);
-
--- Alter table to set owner to postgres
+-- (optional, matching your pattern)
 ALTER TABLE "public"."posts" OWNER TO "postgres";
-
--- Alter table to set owner to postgres
 ALTER TABLE "public"."profiles" OWNER TO "postgres";
+ALTER TABLE "public"."images" OWNER TO "postgres";
 
 -- Alter table to add foreign key for likes table
 ALTER TABLE ONLY "public"."likes"
@@ -251,30 +243,16 @@ CREATE POLICY "Users can read their own likes" ON "public"."likes" FOR SELECT TO
 CREATE POLICY "Users can like posts" ON "public"."likes" FOR INSERT TO authenticated WITH CHECK (auth.uid () = user_id);
 CREATE POLICY "Users can delete their own likes" ON "public"."likes" FOR DELETE TO authenticated USING (auth.uid () = user_id);
 
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- NEW: images RLS (owner-only access)
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+CREATE POLICY "Users can read their own images" ON "public"."images" FOR SELECT TO authenticated USING (auth.uid () = user_id);
+CREATE POLICY "Users can upload images"         ON "public"."images" FOR INSERT TO authenticated WITH CHECK (auth.uid () = user_id);
+CREATE POLICY "Users can update their images"   ON "public"."images" FOR UPDATE TO authenticated USING (auth.uid () = user_id);
+CREATE POLICY "Users can delete their images"   ON "public"."images" FOR DELETE TO authenticated USING (auth.uid () = user_id);
+
 -- users
 CREATE POLICY "Anyone can view auth users" ON "auth"."users" FOR SELECT TO authenticated USING (true);
-
--- images
-CREATE POLICY "Users can view own images"
-  ON public.images FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own images"
-  ON public.images FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own images"
-  ON public.images FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own images"
-  ON public.images FOR DELETE
-  TO authenticated
-  USING (auth.uid() = user_id);
 
 -- Enable row level security for all tables
 ALTER TABLE "public"."likes" ENABLE ROW LEVEL SECURITY;
@@ -294,5 +272,10 @@ ALTER TABLE "public"."projects" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."comments" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."endorsements" ENABLE ROW LEVEL SECURITY;
+
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-- NEW: enable RLS for images
+ALTER TABLE "public"."images" ENABLE ROW LEVEL SECURITY;
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 RESET ALL;
