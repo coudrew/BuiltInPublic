@@ -8,8 +8,7 @@ CREATE TABLE IF NOT EXISTS public.images (
   width INTEGER,
   height INTEGER,
   file_size BIGINT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Enable RLS
