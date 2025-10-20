@@ -29,19 +29,7 @@ Before getting started, make sure you have the following installed:
 <summary>📁 Click to expand project file structure</summary>
 
 ```plaintext
-.
-├── components.json
-├── config
-│   └── private
-│       └── profanity-list.ts
-├── docs
-│   ├── appregistered.png
-│   ├── oathapps.png
-│   ├── pull_request_template.md
-│   └── registerapp.png
-├── .env
 ├── .env.example
-├── eslint.config.mjs
 ├── .gitguardian.toml
 ├── .github
 │   ├── ISSUE_TEMPLATE
@@ -62,20 +50,32 @@ Before getting started, make sure you have the following installed:
 ├── .husky
 │   ├── pre-commit
 │   └── pre-push
-├── instrumentation-client.ts
-├── knip.config.json
-├── LICENSE
-├── next.config.mjs
-├── next-env.d.ts
-├── package.json
-├── package-lock.json
-├── postcss.config.mjs
 ├── .prettierignore
 ├── .prettierrc.yml
+├── components.json
+├── config
+│   └── private
+│       └── profanity-list.ts
+├── docs
+│   ├── appregistered.png
+│   ├── oathapps.png
+│   ├── pull_request_template.md
+│   └── registerapp.png
+├── eslint.config.mjs
+├── gitleaks-report.json
+├── instrumentation-client.ts
+├── knip-report.md
+├── knip.config.json
+├── LICENSE
+├── next-env.d.ts
+├── next.config.mjs
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
 ├── public
 │   ├── 404
-│   │   ├── funny10.png
 │   │   ├── funny1.png
+│   │   ├── funny10.png
 │   │   ├── funny2.png
 │   │   ├── funny3.png
 │   │   ├── funny4.png
@@ -99,32 +99,31 @@ Before getting started, make sure you have the following installed:
 ├── scripts
 │   ├── generateSupabaseTypes.ts
 │   ├── precheck.sh
-│   ├── seeds
-│   │   ├── auth-users.ts
-│   │   ├── policy-doc.ts
-│   │   ├── posts.ts
-│   │   ├── profile-skills.ts
-│   │   ├── projects.ts
-│   │   ├── skills.ts
-│   │   └── social.ts
-│   └── seed.ts
+│   ├── seed.ts
+│   └── seeds
+│       ├── auth-users.ts
+│       ├── policy-doc.ts
+│       ├── posts.ts
+│       ├── profile-skills.ts
+│       ├── projects.ts
+│       ├── skills.ts
+│       └── social.ts
 ├── SECURITY.md
 ├── src
 │   ├── app
-│   │   ├── about
-│   │   │   └── page.tsx
-│   │   ├── auth
-│   │   │   ├── actions.ts
-│   │   │   ├── callback
-│   │   │   │   └── route.ts
-│   │   │   ├── DevSignIn.tsx
-│   │   │   ├── oauth
-│   │   │   │   └── route.ts
-│   │   │   └── page.tsx
-│   │   ├── favicon.ico
-│   │   ├── globals.css
-│   │   ├── layout.tsx
 │   │   ├── (main)
+│   │   │   ├── [username]
+│   │   │   │   ├── components
+│   │   │   │   │   ├── FeedSection.tsx
+│   │   │   │   │   ├── GradientBlobs.tsx
+│   │   │   │   │   ├── StreakSection.tsx
+│   │   │   │   │   └── UserInfo.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── profile.css
+│   │   │   │   └── project
+│   │   │   │       ├── [id]
+│   │   │   │       │   └── page.tsx
+│   │   │   │       └── page.tsx
 │   │   │   ├── dashboard
 │   │   │   │   ├── feed
 │   │   │   │   │   ├── Feed.tsx
@@ -141,24 +140,25 @@ Before getting started, make sure you have the following installed:
 │   │   │   │   └── stats
 │   │   │   │       └── Stats.tsx
 │   │   │   ├── layout.tsx
-│   │   │   ├── onboarding
-│   │   │   │   ├── onboarding-form
-│   │   │   │   │   ├── actions.ts
-│   │   │   │   │   ├── onboarding-form.schema.ts
-│   │   │   │   │   └── OnboardingForm.tsx
-│   │   │   │   └── page.tsx
-│   │   │   └── [username]
-│   │   │       ├── components
-│   │   │       │   ├── FeedSection.tsx
-│   │   │       │   ├── GradientBlobs.tsx
-│   │   │       │   ├── StreakSection.tsx
-│   │   │       │   └── UserInfo.tsx
-│   │   │       ├── page.tsx
-│   │   │       ├── profile.css
-│   │   │       └── project
-│   │   │           ├── [id]
-│   │   │           │   └── page.tsx
-│   │   │           └── page.tsx
+│   │   │   └── onboarding
+│   │   │       ├── onboarding-form
+│   │   │       │   ├── actions.ts
+│   │   │       │   ├── onboarding-form.schema.ts
+│   │   │       │   └── OnboardingForm.tsx
+│   │   │       └── page.tsx
+│   │   ├── about
+│   │   │   └── page.tsx
+│   │   ├── auth
+│   │   │   ├── actions.ts
+│   │   │   ├── callback
+│   │   │   │   └── route.ts
+│   │   │   ├── DevSignIn.tsx
+│   │   │   ├── oauth
+│   │   │   │   └── route.ts
+│   │   │   └── page.tsx
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
 │   │   ├── not-found.tsx
 │   │   ├── page.tsx
 │   │   ├── project
@@ -189,8 +189,8 @@ Before getting started, make sure you have the following installed:
 │   │   ├── Projects
 │   │   │   ├── CreateProject
 │   │   │   │   ├── actions.ts
-│   │   │   │   ├── CreateProjectButton.tsx
-│   │   │   │   └── createProject.schema.ts
+│   │   │   │   ├── createProject.schema.ts
+│   │   │   │   └── CreateProjectButton.tsx
 │   │   │   ├── ProjectCard.tsx
 │   │   │   ├── ProjectPanel
 │   │   │   │   ├── ProjectDeleteButton.tsx
@@ -260,22 +260,21 @@ Before getting started, make sure you have the following installed:
 │   │   └── UINotification.service.ts
 │   ├── setupTests.ts
 │   └── use-cases
+│       ├── __tests__
+│       │   └── BaseMutationUseCase.test.ts
 │       ├── BaseFetchUseCase.ts
 │       ├── BaseMutationUseCase.ts
 │       ├── projects
-│       │   ├── CreateNewProject.ts
-│       │   ├── DeleteProject.ts
-│       │   ├── EditProject.ts
-│       │   ├── GetProject.ts
 │       │   ├── __tests__
 │       │   │   ├── CreateNewProject.test.ts
 │       │   │   ├── DeleteProject.test.ts
 │       │   │   ├── EditProject.test.ts
-│       │   │   ├── Images.test.ts
 │       │   │   └── UpdateProject.test.ts
+│       │   ├── CreateNewProject.ts
+│       │   ├── DeleteProject.ts
+│       │   ├── EditProject.ts
+│       │   ├── GetProject.ts
 │       │   └── UpdateProject.ts
-│       ├── __tests__
-│       │   └── BaseMutationUseCase.test.ts
 │       ├── updateUserProfile
 │       │   ├── __tests__
 │       │   │   └── UpdateUserProfile.test.ts
@@ -285,19 +284,26 @@ Before getting started, make sure you have the following installed:
 │           │   └── UserConsent.test.ts
 │           └── UserConsent.ts
 ├── supabase
-│   ├── .branches
-│   │   └── _current_branch
+│   ├── __tests__
+│   │   ├── rls-policies
+│   │   │   ├── profiles.business.test.ts
+│   │   │   ├── profiles.test.ts
+│   │   │   └── projects.test.ts
+│   │   ├── testClients.ts
+│   │   └── testUser.ts
+│   ├── .gitignore
+│   ├── .temp
+│   │   └── cli-latest
 │   ├── config.toml
 │   ├── functions
+│   │   ├── _shared
+│   │   │   └── supabase.types.ts
 │   │   ├── deno.json
 │   │   ├── email-signup-link
+│   │   │   ├── .npmrc
 │   │   │   ├── deno.json
-│   │   │   ├── index.ts
-│   │   │   └── .npmrc
-│   │   ├── env.example
-│   │   └── _shared
-│   │       └── supabase.types.ts
-│   ├── .gitignore
+│   │   │   └── index.ts
+│   │   └── env.example
 │   ├── migrations
 │   │   ├── 20250517104606_base_tables_rls.sql
 │   │   ├── 20250518145124_new_profile_trigger.sql
@@ -313,24 +319,15 @@ Before getting started, make sure you have the following installed:
 │   │   ├── 20250907141731_policy_doc_triggers.sql
 │   │   └── 20251018114100_add_images_table.sql
 │   ├── seed.sql
-│   ├── supabase.types.ts
-│   ├── .temp
-│   │   └── cli-latest
-│   └── __tests__
-│       ├── rls-policies
-│       │   ├── profiles.business.test.ts
-│       │   ├── profiles.test.ts
-│       │   └── projects.test.ts
-│       ├── testClients.ts
-│       └── testUser.ts
+│   └── supabase.types.ts
 ├── tsconfig.json
 ├── utils
 │   ├── errors
 │   │   └── ValidationError.ts
 │   ├── SecureURLValidator
-│   │   ├── SecureURLValidator.ts
-│   │   └── __tests__
-│   │       └── SecureURLValidator.test.ts
+│   │   ├── __tests__
+│   │   │   └── SecureURLValidator.test.ts
+│   │   └── SecureURLValidator.ts
 │   ├── supabase
 │   │   ├── middleware.ts
 │   │   ├── NextJSCookieStorage.ts
