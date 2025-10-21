@@ -18,21 +18,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # Run vitest with JUnit + coverage
+      # Run vitest with JUnit + (optional) coverage
       - name: Run unit tests
         id: test
         run: |
           mkdir -p test-results
-          npx vitest run \
+          pnpm exec vitest run \
             --reporter=default \
             --reporter=junit \
             --outputFile=./test-results/junit.xml
@@ -45,7 +50,6 @@ jobs:
           paths: test-results/**/*.xml
           show: 'fail,skip'
 
-      # Write a quick summary to the PR (visible in GitHub UI)
       - name: Coverage summary
         if: always()
         run: |
@@ -56,7 +60,6 @@ jobs:
             echo "_No coverage summary found._" >> $GITHUB_STEP_SUMMARY
           fi
 
-      # Upload artifacts even if tests fail
       - name: Upload JUnit report
         if: always()
         uses: actions/upload-artifact@v4
