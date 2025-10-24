@@ -15,8 +15,8 @@
     "test:watch": "vitest --watch",
     "db:migrate": "supabase db reset",
     "db:seed": "tsx scripts/seed.ts",
-    "db:setup": "npm run db:migrate && npm run db:seed",
-    "start:dev": "npm run db:setup && npm run dev",
+    "db:setup": "pnpm db:migrate && pnpm db:seed",
+    "start:dev": "pnpm db:setup && pnpm dev",
     "generate:types": "tsx scripts/generateSupabaseTypes.ts"
   },
   "dependencies": {
@@ -40,7 +40,7 @@
     "lucide-react": "^0.542.0",
     "next": "^15.5.2",
     "next-themes": "^0.4.6",
-    "posthog-js": "1.260.2",
+    "posthog-js": "^1.260.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-github-calendar": "^4.5.9",
