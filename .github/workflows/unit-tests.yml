@@ -18,31 +18,48 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      # Install pnpm but don't auto-install yet (we want a strict lockfile check first)
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
+          run_install: false
 
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'pnpm'
+          # Include all lockfiles if you ever split into workspace packages
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
+      # Fail early if the lockfile is missing (prevents "helpful" non-deterministic installs)
+      - name: Lockfile must be committed
+        run: |
+          test -f pnpm-lock.yaml || (echo "pnpm-lock.yaml missing. Commit it before running CI." && exit 1)
+
+      # Deterministic install — will fail if package.json and lockfile are out of sync
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Run vitest with JUnit + (optional) coverage
+      # Double-check no one changed deps without updating the lockfile
+      - name: Verify lockfile unchanged
+        run: git diff --exit-code pnpm-lock.yaml
+
+      # Run vitest in CI mode with JUnit + coverage so the later steps have files to read
       - name: Run unit tests
         id: test
         run: |
           mkdir -p test-results
-          pnpx vitest run \
+          pnpm exec vitest run \
+            --coverage \
             --reporter=default \
             --reporter=junit \
             --outputFile=./test-results/junit.xml
 
-      # Generate test summary
+      # PR-friendly summary of test results
       - name: Test Summary
         if: always() && github.event_name == 'pull_request'
         uses: test-summary/action@v2
@@ -50,6 +67,7 @@ jobs:
           paths: test-results/**/*.xml
           show: 'fail,skip'
 
+      # Coverage summary in the GitHub step summary (works with Vitest's default coverage output)
       - name: Coverage summary
         if: always()
         run: |
@@ -60,6 +78,7 @@ jobs:
             echo "_No coverage summary found._" >> $GITHUB_STEP_SUMMARY
           fi
 
+      # Artifacts: JUnit + raw coverage + HTML report
       - name: Upload JUnit report
         if: always()
         uses: actions/upload-artifact@v4
