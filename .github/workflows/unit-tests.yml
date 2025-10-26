@@ -47,7 +47,7 @@ jobs:
         id: test
         run: |
           mkdir -p test-results
-          pnpx vitest run \
+          pnpm exec vitest run \
             --environment=jsdom \
             --coverage \
             --reporter=default \
