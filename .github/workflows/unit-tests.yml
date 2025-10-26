@@ -34,11 +34,6 @@ jobs:
             pnpm-lock.yaml
             **/pnpm-lock.yaml
 
-      # Ensure lockfile exists
-      - name: Lockfile must be committed
-        run: |
-          test -f pnpm-lock.yaml || (echo "pnpm-lock.yaml missing. Commit it before running CI." && exit 1)
-
       # Install dependencies deterministically
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -47,7 +42,7 @@ jobs:
       - name: Verify lockfile unchanged
         run: git diff --exit-code pnpm-lock.yaml
 
-      # 🧪 Run Vitest + jsdom + coverage
+      # Run vitest with JUnit + coverage
       - name: Run unit tests
         id: test
         run: |
@@ -59,7 +54,7 @@ jobs:
             --reporter=junit \
             --outputFile=./test-results/junit.xml
 
-      # 💬 Summarize test results on PRs
+      # Generate test summary
       - name: Test Summary
         if: always() && github.event_name == 'pull_request'
         uses: test-summary/action@v2
@@ -67,7 +62,7 @@ jobs:
           paths: test-results/**/*.xml
           show: 'fail,skip'
 
-      # 🧾 Coverage summary in job summary
+      # Write a quick summary to the PR (visible in GitHub UI)
       - name: Coverage summary
         if: always()
         run: |
@@ -78,7 +73,7 @@ jobs:
             echo "_No coverage summary found._" >> $GITHUB_STEP_SUMMARY
           fi
 
-      # 📦 Upload artifacts
+      # Upload artifacts even if tests fail
       - name: Upload JUnit report
         if: always()
         uses: actions/upload-artifact@v4
