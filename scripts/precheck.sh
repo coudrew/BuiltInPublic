@@ -1,8 +1,6 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
+#!/bin/bash
 # Skip checks if the latest commit has [skip-precheck]
-LAST_COMMIT_MSG=$(git log -1 --pretty=%B || true)
+LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
 if echo "$LAST_COMMIT_MSG" | grep -qi '\[skip-precheck\]'; then
   echo "⚠️ Skipping pre-push checks due to [skip-precheck] tag in last commit."
   exit 0
@@ -10,24 +8,15 @@ fi
 
 echo "🔍 Running Pre-PR Security & Code Quality Checks..."
 
-# Ensure we're in a pnpm-based repo
-if [ ! -f pnpm-lock.yaml ]; then
-  echo "🛑 pnpm-lock.yaml not found. This hook assumes pnpm. Please commit it first."
-  exit 1
-fi
-
-# Helper for local binaries
-EXEC="pnpm exec"
-
 # Exit immediately on error
 set -e
 
-# Check for required tools (through pnpm exec)
+# Check for required tools
 REQUIRED_TOOLS=("prettier" "gitleaks" "eslint")
 
 for tool in "${REQUIRED_TOOLS[@]}"; do
-  if ! $EXEC "$tool" --version >/dev/null 2>&1; then
-    echo "❌ $tool is not available via pnpm exec. Please install it (pnpm add -D $tool)."
+  if ! command -v $tool &> /dev/null; then
+    echo "❌ $tool is not installed. Please install it before pushing."
     exit 1
   fi
 done
@@ -39,7 +28,7 @@ echo "📂 Checking for empty files in commits being pushed..."
 ALLOW_EMPTY_REGEX='(^|/)\.gitkeep$|(^|/)\.keep$'
 
 # Get the base commit for comparison
-UPSTREAM=${UPSTREAM:-}
+# If there's an upstream branch, use that; otherwise, compare against the last commit
 if [ -n "$UPSTREAM" ]; then
   BASE=$(git merge-base HEAD "$UPSTREAM")
   FILES_TO_CHECK=$(git diff --name-only --diff-filter=AM "$BASE"..HEAD)
@@ -70,14 +59,13 @@ echo -e "✅ No empty files found.\n"
 
 # 1. Format check & fix
 echo "🎨 Running Prettier..."
-PRETTIER_OUTPUT=$($EXEC prettier --config .prettierrc.yml --write . || true)
-CHANGED_FILES=$(printf "%s\n" "$PRETTIER_OUTPUT" | grep -E '^[^ ]' || true)
-
+CHANGED_FILES=$(npx prettier --config .prettierrc.yml --write --list-different .)
 if [ -n "$CHANGED_FILES" ]; then
   echo -e "💾 Prettier made changes to the following files:\n"
   echo -e "$CHANGED_FILES\n"
-  printf "%s\0" $CHANGED_FILES | xargs -0 git add
+  git add $CHANGED_FILES
   git commit -m "style: auto-format code with Prettier [skip-precheck]"
+
   echo -e "🛑 Formatting changes committed. Please review and push again.\n"
   exit 1
 else
@@ -86,7 +74,7 @@ fi
 
 # 2. ESLint check & fix
 echo "🧹 Running ESLint..."
-if ! $EXEC eslint . --fix; then
+if ! npm run lint . --fix; then
   echo -e "❌ ESLint errors found that could not be auto-fixed. Aborting push.\n"
   exit 1
 fi
@@ -94,7 +82,7 @@ echo -e "✅ ESLint passed.\n"
 
 # 3. Secrets scan with Gitleaks
 echo -e "🕵️‍♀️ Running Gitleaks...\n"
-if ! $EXEC gitleaks detect --source . --report-path gitleaks-report.json --config .gitleaks.toml; then
+if ! gitleaks detect --source . --report-path gitleaks-report.json --config .gitleaks.toml; then
   echo -e "🛑 Gitleaks detected secrets. Aborting push.\n"
   exit 1
 fi
@@ -104,18 +92,19 @@ if ! git diff --cached --quiet || ! git diff --quiet; then
   echo "💾 Committing Prettier or lint fixes..."
   git add .
   git commit -m "style: auto-fix linting and formatting issues [skip-precheck]"
+
   echo -e "🛑 Formatting fixes committed. Please review and push again.\n"
   exit 1
 else
   echo -e "✅ No changes to commit.\n"
 fi
 
-# 5. pnpm audit
-echo "🛡 Running pnpm audit (high severity or above will block push)..."
-if ! pnpm audit --audit-level=high; then
-  echo -e "🛑 pnpm audit found high-severity vulnerabilities. Please fix before pushing.\n"
+# 5. npm audit
+echo "🛡 Running npm audit (high severity or above will block push)..."
+if ! npm audit --audit-level=high; then
+  echo -e "🛑 npm audit found high-severity vulnerabilities. Please fix before pushing.\n"
   exit 1
 fi
-echo -e "✅ pnpm audit passed.\n"
+echo -e "✅ npm audit passed.\n"
 
 echo -e "🚀 All checks passed. Ready to push!\n"
