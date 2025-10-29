@@ -29,6 +29,7 @@ Before getting started, make sure you have the following installed:
 <summary>📁 Click to expand project file structure</summary>
 
 ```plaintext
+.
 ├── .env.example
 ├── .gitguardian.toml
 ├── .github
@@ -48,6 +49,24 @@ Before getting started, make sure you have the following installed:
 ├── .gitignore
 ├── .gitleaks.toml
 ├── .husky
+│   ├── _
+│   │   ├── .gitignore
+│   │   ├── applypatch-msg
+│   │   ├── commit-msg
+│   │   ├── h
+│   │   ├── husky.sh
+│   │   ├── post-applypatch
+│   │   ├── post-checkout
+│   │   ├── post-commit
+│   │   ├── post-merge
+│   │   ├── post-rewrite
+│   │   ├── pre-applypatch
+│   │   ├── pre-auto-gc
+│   │   ├── pre-commit
+│   │   ├── pre-merge-commit
+│   │   ├── pre-push
+│   │   ├── pre-rebase
+│   │   └── prepare-commit-msg
 │   ├── pre-commit
 │   └── pre-push
 ├── .prettierignore
@@ -69,8 +88,8 @@ Before getting started, make sure you have the following installed:
 ├── LICENSE
 ├── next-env.d.ts
 ├── next.config.mjs
-├── package-lock.json
 ├── package.json
+├── pnpm-lock.yaml
 ├── postcss.config.mjs
 ├── public
 │   ├── 404

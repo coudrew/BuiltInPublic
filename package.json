@@ -15,8 +15,8 @@
     "test:watch": "vitest --watch",
     "db:migrate": "supabase db reset",
     "db:seed": "tsx scripts/seed.ts",
-    "db:setup": "npm run db:migrate && npm run db:seed",
-    "start:dev": "npm run db:setup && npm run dev",
+    "db:setup": "pnpm db:migrate && pnpm db:seed",
+    "start:dev": "pnpm db:setup && pnpm dev",
     "generate:types": "tsx scripts/generateSupabaseTypes.ts"
   },
   "dependencies": {
@@ -54,6 +54,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/jsdom": "^21.1.7",
     "@types/leo-profanity": "^1.5.4",
