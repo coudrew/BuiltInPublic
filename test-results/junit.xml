@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="38" failures="0" errors="0" time="0.037185973">
+    <testsuite name="src/use-cases/__tests__/BaseMutationUseCase.test.ts" timestamp="2025-10-26T22:14:23.769Z" hostname="pop-os.loc" tests="11" failures="0" errors="0" skipped="0" time="0.005521579">
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves null values in update data" time="0.0018765">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; removes undefined values from update data" time="0.000208789">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves empty string values in update data" time="0.000140559">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves falsy but valid values" time="0.00013344">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; throws NO_VALID_FIELDS error when all values are undefined" time="0.000753145">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; handles mixed valid and nullish values" time="0.00015213">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves complex object values" time="0.00016104">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; throws NO_VALID_FIELDS error for empty object input" time="0.000178259">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves array values" time="0.000206719">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves all string values including empty strings" time="0.000138919">
+        </testcase>
+        <testcase classname="src/use-cases/__tests__/BaseMutationUseCase.test.ts" name="BaseUseCase.compactUpdateData &gt; preserves null values for bio deletion use case" time="0.000179399">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/use-cases/projects/__tests__/CreateNewProject.test.ts" timestamp="2025-10-26T22:14:23.771Z" hostname="pop-os.loc" tests="4" failures="0" errors="0" skipped="0" time="0.006363305">
+        <testcase classname="src/use-cases/projects/__tests__/CreateNewProject.test.ts" name="Use case - CreateNewProject &gt; should respond with success: true and a message when creation succeeds" time="0.002234157">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/CreateNewProject.test.ts" name="Use case - CreateNewProject &gt; should sanitize input" time="0.002330007">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/CreateNewProject.test.ts" name="Use case - CreateNewProject &gt; should fail if sanitizing input results in empty string for name" time="0.000221438">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/CreateNewProject.test.ts" name="Use case - CreateNewProject &gt; should respond with success: false and a message when creation fails" time="0.000254149">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/use-cases/projects/__tests__/DeleteProject.test.ts" timestamp="2025-10-26T22:14:23.772Z" hostname="pop-os.loc" tests="2" failures="0" errors="0" skipped="0" time="0.003768549">
+        <testcase classname="src/use-cases/projects/__tests__/DeleteProject.test.ts" name="Use case - Delete Project &gt; should respond with success: true and a message when deletion succeeds" time="0.002141338">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/DeleteProject.test.ts" name="Use case - Delete Project &gt; should respond with success: false and a message when deletion fails" time="0.000411017">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/use-cases/projects/__tests__/EditProject.test.ts" timestamp="2025-10-26T22:14:23.773Z" hostname="pop-os.loc" tests="8" failures="0" errors="0" skipped="0" time="0.006538944">
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; returns success: true and a message if update succeeds" time="0.002139028">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; returns success: false and a message if update fails" time="0.000287978">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; fails if a provided URL is invalid" time="0.000496508">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; fails if a provided URL is invalid" time="0.000237828">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; fails if a provided URL is invalid" time="0.000154209">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; sanitizes descriptions" time="0.001681171">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; sanitizes name updates" time="0.000297818">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/EditProject.test.ts" name="Use case - EditProject &gt; fails if sanitized name update results in an empty string" time="0.000212059">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/use-cases/projects/__tests__/UpdateProject.test.ts" timestamp="2025-10-26T22:14:23.774Z" hostname="pop-os.loc" tests="4" failures="0" errors="0" skipped="0" time="0.005616898">
+        <testcase classname="src/use-cases/projects/__tests__/UpdateProject.test.ts" name="Use case - UpdateProject &gt; should respond with success: true and a message when creation succeeds" time="0.002066469">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/UpdateProject.test.ts" name="Use case - UpdateProject &gt; should sanitize input" time="0.001998519">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/UpdateProject.test.ts" name="Use case - UpdateProject &gt; should fail if sanitizing input results in empty string for update" time="0.000213259">
+        </testcase>
+        <testcase classname="src/use-cases/projects/__tests__/UpdateProject.test.ts" name="Use case - UpdateProject &gt; should respond with success: false and a message when creation fails" time="0.000213789">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" timestamp="2025-10-26T22:14:23.774Z" hostname="pop-os.loc" tests="7" failures="0" errors="0" skipped="0" time="0.005929957">
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; UpdateUserProfile username handling &gt; Fails if username is a route" time="0.001949439">
+        </testcase>
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; UpdateUserProfile username handling &gt; Fails if username exists" time="0.000331938">
+        </testcase>
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; UpdateUserProfile username handling &gt; Fails if username is profanity" time="0.000385098">
+        </testcase>
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; UpdateUserProfile username handling &gt; Fails if username is profanity" time="0.000250748">
+        </testcase>
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; UpdateUserProfile username handling &gt; Fails if username is profanity" time="0.000194889">
+        </testcase>
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; Profile updating &gt; Returns success if profile is updated" time="0.000329708">
+        </testcase>
+        <testcase classname="src/use-cases/updateUserProfile/__tests__/UpdateUserProfile.test.ts" name="Use Case - UpdateUserProfile &gt; Profile updating &gt; Throws error when profile update fails" time="0.001408152">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/use-cases/userConsent/__tests__/UserConsent.test.ts" timestamp="2025-10-26T22:14:23.775Z" hostname="pop-os.loc" tests="2" failures="0" errors="0" skipped="0" time="0.003446741">
+        <testcase classname="src/use-cases/userConsent/__tests__/UserConsent.test.ts" name="UserConsent use case &gt; returns success: true when insert succeeds" time="0.001975839">
+        </testcase>
+        <testcase classname="src/use-cases/userConsent/__tests__/UserConsent.test.ts" name="UserConsent use case &gt; returns success: false when insert fails" time="0.000304338">
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -74,7 +74,7 @@ fi
 
 # 2. ESLint check & fix
 echo "🧹 Running ESLint..."
-if ! npm run lint . --fix; then
+if ! pnpm run lint . --fix; then
   echo -e "❌ ESLint errors found that could not be auto-fixed. Aborting push.\n"
   exit 1
 fi
@@ -99,12 +99,12 @@ else
   echo -e "✅ No changes to commit.\n"
 fi
 
-# 5. npm audit
-echo "🛡 Running npm audit (high severity or above will block push)..."
-if ! npm audit --audit-level=high; then
-  echo -e "🛑 npm audit found high-severity vulnerabilities. Please fix before pushing.\n"
+# 5. pnpm audit
+echo "🛡 Running pnpm audit (high severity or above will block push)..."
+if ! pnpm audit --audit-level=high; then
+  echo -e "🛑 pnpm audit found high-severity vulnerabilities. Please fix before pushing.\n"
   exit 1
 fi
-echo -e "✅ npm audit passed.\n"
+echo -e "✅ pnpm audit passed.\n"
 
 echo -e "🚀 All checks passed. Ready to push!\n"

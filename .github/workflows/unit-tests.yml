@@ -18,21 +18,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      # Install pnpm (no auto-install yet)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - name: Set up Node
         uses: actions/setup-node@v5
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
 
+      # Install dependencies deterministically
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      # Double-check no one changed deps without updating lockfile
+      - name: Verify lockfile unchanged
+        run: git diff --exit-code pnpm-lock.yaml
 
       # Run vitest with JUnit + coverage
       - name: Run unit tests
         id: test
         run: |
           mkdir -p test-results
-          npx vitest run \
+          pnpm vitest run \
+            --environment=jsdom \
+            --coverage \
             --reporter=default \
             --reporter=junit \
             --outputFile=./test-results/junit.xml

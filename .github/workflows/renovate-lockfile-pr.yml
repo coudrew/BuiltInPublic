@@ -1,5 +1,3 @@
-# .github/workflows/renovate-lockfile-ci.yml
-
 name: Renovate Lockfile Reproducibility Check
 
 on:
@@ -23,24 +21,29 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: 🧰 Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '22.19.0'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies (CI mode)
-        run: npm ci --ignore-scripts --no-audit --no-fund
+        run: pnpm install --frozen-lockfile --ignore-scripts --no-frozen-lockfile=false
 
       - name: 🔍 Detect lockfile drift
         id: drift
         run: |
-          if git diff --quiet --exit-code -- package-lock.json; then
+          if git diff --quiet --exit-code -- pnpm-lock.yaml; then
             echo "✅ Lockfile is stable after install"
             echo "lockfile_status=clean" >> $GITHUB_OUTPUT
           else
             echo "::error::❌ Lockfile changed after install. Stale lockfile from Renovate?"
-            git --no-pager diff -- package-lock.json || true
+            git --no-pager diff -- pnpm-lock.yaml || true
             echo "lockfile_status=dirty" >> $GITHUB_OUTPUT
           fi
 
@@ -57,15 +60,14 @@ jobs:
               pull_number: pr.number,
               state: 'closed'
             });
-
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pr.number,
               body: [
-                "🚫 Auto-closed: This PR contains a stale or invalid `package-lock.json`.",
+                "🚫 Auto-closed: This PR contains a stale or invalid `pnpm-lock.yaml`.",
                 "",
-                "Renovate generated a lockfile that isn't reproducible via `npm ci`.",
+                "Renovate generated a lockfile that isn't reproducible via `pnpm install --frozen-lockfile`.",
                 "Please rebase or rerun Renovate to regenerate the lockfile cleanly."
               ].join('\n')
             });
