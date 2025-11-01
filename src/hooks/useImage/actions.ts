@@ -180,11 +180,11 @@ export async function uploadImage(
 
     const imageId = randomUUID();
     const fileExt = file.name.split('.').pop()?.toLowerCase() || 'webp';
-    
+
     // Validate file extension to prevent path traversal
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
     const sanitizedExt = allowedExtensions.includes(fileExt) ? fileExt : 'webp';
-    
+
     const storagePath = buildStoragePath(user.id, imageId, sanitizedExt);
 
     const { error: uploadError } = await supabase.storage
