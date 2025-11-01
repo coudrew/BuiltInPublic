@@ -126,6 +126,11 @@ function buildStoragePath(
   imageId: string,
   fileExt: string
 ): string {
+  // Validate UUID format to prevent path traversal
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(userId) || !uuidRegex.test(imageId)) {
+    throw new Error('Invalid user or image identifier');
+  }
   return `${userId}/${imageId}.${fileExt}`;
 }
 
