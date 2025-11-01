@@ -17,71 +17,80 @@ interface ProjectImagesProps {
 
 const MAX_GALLERY_IMAGES = 4;
 
-const EmptyImagePlaceholder = ({ message, subMessage }: { message: string; subMessage?: string }) => (
-  <div className="flex flex-col items-center justify-center text-gray-500">
-    <ImageIcon className="w-8 h-8 mb-2" />
-    <span className="text-sm font-medium">{message}</span>
-    {subMessage && <span className="text-xs">{subMessage}</span>}
+const EmptyImagePlaceholder = ({
+  message,
+  subMessage,
+}: {
+  message: string;
+  subMessage?: string;
+}) => (
+  <div className='flex flex-col items-center justify-center text-gray-500'>
+    <ImageIcon className='w-8 h-8 mb-2' />
+    <span className='text-sm font-medium'>{message}</span>
+    {subMessage && <span className='text-xs'>{subMessage}</span>}
   </div>
 );
 
 const PrimaryImageDisplay = ({ imageUrl }: { imageUrl?: string | null }) => (
-  <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gray-900">
+  <div className='relative aspect-video w-full rounded-lg overflow-hidden bg-gray-900'>
     {imageUrl ? (
       <Image
         src={imageUrl}
-        alt="Primary project image"
+        alt='Primary project image'
         fill
-        className="object-cover"
+        className='object-cover'
       />
     ) : (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <EmptyImagePlaceholder message="No image uploaded" />
+      <div className='absolute inset-0 flex items-center justify-center'>
+        <EmptyImagePlaceholder message='No image uploaded' />
       </div>
     )}
   </div>
 );
 
-export function ProjectImages({ canEdit = false, project }: ProjectImagesProps) {
+export function ProjectImages({
+  canEdit = false,
+  project,
+}: ProjectImagesProps) {
   if (!canEdit && project) {
     return <ProjectImagesDisplay project={project} />;
   }
-  
+
   return <ProjectImagesEdit />;
 }
 
 function ProjectImagesDisplay({ project }: { project: Project }) {
   const { primaryImage, galleryImages } = project;
   const galleryCount = galleryImages?.length || 0;
-  
+
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-100">Cover Image</h3>
+      <CardContent className='pt-6'>
+        <div className='space-y-8'>
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold text-gray-100'>Cover Image</h3>
             <PrimaryImageDisplay imageUrl={primaryImage} />
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-100">
+          <div className='space-y-4'>
+            <h3 className='text-lg font-semibold text-gray-100'>
               Gallery Preview ({galleryCount}/{MAX_GALLERY_IMAGES})
             </h3>
 
             {galleryCount === 0 ? (
-              <div className="rounded-lg border-2 border-dashed border-gray-800 p-8">
-                <EmptyImagePlaceholder 
-                  message="No gallery images" 
+              <div className='rounded-lg border-2 border-dashed border-gray-800 p-8'>
+                <EmptyImagePlaceholder
+                  message='No gallery images'
                   subMessage={`Add up to ${MAX_GALLERY_IMAGES} images to your gallery`}
                 />
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                 {galleryImages?.map((imageUrl, index) => (
-                  <GalleryImageItem 
-                    key={`${imageUrl}-${index}`} 
-                    imageUrl={imageUrl} 
-                    index={index} 
+                  <GalleryImageItem
+                    key={`${imageUrl}-${index}`}
+                    imageUrl={imageUrl}
+                    index={index}
                   />
                 ))}
               </div>
@@ -93,19 +102,27 @@ function ProjectImagesDisplay({ project }: { project: Project }) {
   );
 }
 
-const GalleryImageItem = ({ imageUrl, index, onDelete }: { imageUrl: string; index: number; onDelete?: () => void }) => (
-  <div className="relative group aspect-video">
-    <div className="absolute inset-0 rounded-lg bg-gray-900">
+const GalleryImageItem = ({
+  imageUrl,
+  index,
+  onDelete,
+}: {
+  imageUrl: string;
+  index: number;
+  onDelete?: () => void;
+}) => (
+  <div className='relative group aspect-video'>
+    <div className='absolute inset-0 rounded-lg bg-gray-900'>
       <Image
         src={imageUrl}
         alt={`Gallery image ${index + 1}`}
         fill
-        className="object-cover rounded-lg"
+        className='object-cover rounded-lg'
         onError={(e) => {
           const imgElement = e.target as HTMLImageElement;
           imgElement.style.display = 'none';
         }}
-        loading="lazy"
+        loading='lazy'
       />
     </div>
     {onDelete && (
@@ -114,17 +131,18 @@ const GalleryImageItem = ({ imageUrl, index, onDelete }: { imageUrl: string; ind
           e.preventDefault();
           onDelete();
         }}
-        className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        aria-label="Remove image"
+        className='absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+        aria-label='Remove image'
       >
-        <X className="w-3 h-3" />
+        <X className='w-3 h-3' />
       </button>
     )}
   </div>
 );
 
 function ProjectImagesEdit() {
-  const { id, primaryImage, galleryImages, updateProject } = useProjectContext();
+  const { id, primaryImage, galleryImages, updateProject } =
+    useProjectContext();
   const editMutation = useEditProject();
   const galleryCount = galleryImages?.length || 0;
   const canAddMore = galleryCount < MAX_GALLERY_IMAGES;
@@ -132,7 +150,7 @@ function ProjectImagesEdit() {
   const handlePrimaryImageSelect = async (imageUrl: string) => {
     try {
       await updateProject({ primaryImage: imageUrl });
-      
+
       editMutation.mutate(
         { projectId: id, data: { primaryImage: imageUrl } as any },
         {
@@ -151,13 +169,15 @@ function ProjectImagesEdit() {
   const handleGalleryImagesSelect = async (imageUrls: string[]) => {
     try {
       if (galleryCount + imageUrls.length > MAX_GALLERY_IMAGES) {
-        UINotification.error(`Maximum ${MAX_GALLERY_IMAGES} gallery images allowed`);
+        UINotification.error(
+          `Maximum ${MAX_GALLERY_IMAGES} gallery images allowed`
+        );
         return;
       }
 
       const updatedGallery = [...(galleryImages || []), ...imageUrls];
       await updateProject({ galleryImages: updatedGallery });
-      
+
       editMutation.mutate(
         { projectId: id, data: { galleryImages: updatedGallery } as any },
         {
@@ -175,9 +195,10 @@ function ProjectImagesEdit() {
 
   const handleDeleteGalleryImage = async (imageUrl: string) => {
     try {
-      const updatedGallery = galleryImages?.filter((img: string) => img !== imageUrl) || [];
+      const updatedGallery =
+        galleryImages?.filter((img: string) => img !== imageUrl) || [];
       await updateProject({ galleryImages: updatedGallery });
-      
+
       editMutation.mutate(
         { projectId: id, data: { galleryImages: updatedGallery } as any },
         {
@@ -195,19 +216,23 @@ function ProjectImagesEdit() {
 
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-100">Cover Image</h3>
+      <CardContent className='pt-6'>
+        <div className='space-y-8'>
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-lg font-semibold text-gray-100'>
+                Cover Image
+              </h3>
               <ImageUploadModal
                 onSelectSingleImage={handlePrimaryImageSelect}
                 singleImageMode
               >
-                <Button variant="outline" size="sm">
-                  {primaryImage ? 'Change Image' : (
+                <Button variant='outline' size='sm'>
+                  {primaryImage ? (
+                    'Change Image'
+                  ) : (
                     <>
-                      <Plus className="w-4 h-4 mr-2" />
+                      <Plus className='w-4 h-4 mr-2' />
                       Add Image
                     </>
                   )}
@@ -217,9 +242,9 @@ function ProjectImagesEdit() {
             <PrimaryImageDisplay imageUrl={primaryImage} />
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-100">
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-lg font-semibold text-gray-100'>
                 Gallery Preview ({galleryCount}/{MAX_GALLERY_IMAGES})
               </h3>
               {canAddMore && (
@@ -227,8 +252,8 @@ function ProjectImagesEdit() {
                   onSelectMultipleImages={handleGalleryImagesSelect}
                   initialSelectedImages={galleryImages || []}
                 >
-                  <Button variant="outline" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
+                  <Button variant='outline' size='sm'>
+                    <Plus className='w-4 h-4 mr-2' />
                     Add Images
                   </Button>
                 </ImageUploadModal>
@@ -236,14 +261,14 @@ function ProjectImagesEdit() {
             </div>
 
             {galleryCount === 0 ? (
-              <div className="rounded-lg border-2 border-dashed border-gray-800 p-8">
-                <EmptyImagePlaceholder 
-                  message="No gallery images" 
+              <div className='rounded-lg border-2 border-dashed border-gray-800 p-8'>
+                <EmptyImagePlaceholder
+                  message='No gallery images'
                   subMessage={`Add up to ${MAX_GALLERY_IMAGES} images to your gallery`}
                 />
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                 {galleryImages?.map((imageUrl: string, index: number) => (
                   <GalleryImageItem
                     key={`${imageUrl}-${index}`}

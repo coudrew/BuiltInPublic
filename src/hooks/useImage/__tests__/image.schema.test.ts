@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  imageUploadSchema,
-  updateImageAltTextSchema,
-} from '../image.schema';
+import { imageUploadSchema, updateImageAltTextSchema } from '../image.schema';
 import { IMAGE_CONFIG } from '@/lib/imageUtils';
 
 describe('Image Schemas', () => {

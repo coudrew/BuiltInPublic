@@ -1,6 +1,9 @@
 import { AnySupabaseClient } from 'utils/supabase/server';
 
-export abstract class BaseMutationUseCase<TParams, TResult = { success: boolean; message: string }> {
+export abstract class BaseMutationUseCase<
+  TParams,
+  TResult = { success: boolean; message: string },
+> {
   supabase: AnySupabaseClient;
 
   constructor(supabase: AnySupabaseClient) {

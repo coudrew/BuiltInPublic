@@ -139,7 +139,7 @@ export async function processImages(
         `Invalid file type: ${file.name}. Only JPEG, PNG, and WebP are allowed.`
       );
     }
-    
+
     if (!validateFileSize(file)) {
       throw new Error(`File too large: ${file.name}. Maximum size is 10MB.`);
     }

@@ -46,29 +46,57 @@ interface ImageRecord {
 }
 
 const MAGIC_BYTES = {
-  WEBP: [0x52, 0x49, 0x46, 0x46, null, null, null, null, 0x57, 0x45, 0x42, 0x50],
+  WEBP: [
+    0x52,
+    0x49,
+    0x46,
+    0x46,
+    null,
+    null,
+    null,
+    null,
+    0x57,
+    0x45,
+    0x42,
+    0x50,
+  ],
   JPEG: [0xff, 0xd8, 0xff],
   PNG: [0x89, 0x50, 0x4e, 0x47],
 } as const;
 
 async function getAuthenticatedUser() {
   const supabase = await createAnonClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error || !user) {
     return { user: null, supabase };
   }
-  
+
   return { user, supabase };
 }
 
-function checkMagicBytes(bytes: Uint8Array, pattern: readonly (number | null)[]): boolean {
+function checkMagicBytes(
+  bytes: Uint8Array,
+  pattern: readonly (number | null)[]
+): boolean {
   return pattern.every((byte, i) => byte === null || bytes[i] === byte);
 }
 
-async function validateFile(file: File): Promise<{ valid: boolean; error?: string }> {
-  if (!IMAGE_CONFIG.ALLOWED_TYPES.includes(file.type as typeof IMAGE_CONFIG.ALLOWED_TYPES[number])) {
-    return { valid: false, error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' };
+async function validateFile(
+  file: File
+): Promise<{ valid: boolean; error?: string }> {
+  if (
+    !IMAGE_CONFIG.ALLOWED_TYPES.includes(
+      file.type as (typeof IMAGE_CONFIG.ALLOWED_TYPES)[number]
+    )
+  ) {
+    return {
+      valid: false,
+      error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
+    };
   }
 
   if (file.size > IMAGE_CONFIG.MAX_FILE_SIZE) {
@@ -78,25 +106,34 @@ async function validateFile(file: File): Promise<{ valid: boolean; error?: strin
   const buffer = await file.arrayBuffer();
   const bytes = new Uint8Array(buffer);
 
-  const isValid = 
+  const isValid =
     checkMagicBytes(bytes, MAGIC_BYTES.WEBP) ||
     checkMagicBytes(bytes, MAGIC_BYTES.JPEG) ||
     checkMagicBytes(bytes, MAGIC_BYTES.PNG);
 
   if (!isValid) {
-    return { valid: false, error: 'File content does not match declared type.' };
+    return {
+      valid: false,
+      error: 'File content does not match declared type.',
+    };
   }
 
   return { valid: true };
 }
 
-function buildStoragePath(userId: string, imageId: string, fileExt: string): string {
+function buildStoragePath(
+  userId: string,
+  imageId: string,
+  fileExt: string
+): string {
   return `${userId}/${imageId}.${fileExt}`;
 }
 
 function mapImageToData(supabase: any, img: ImageRecord): ImageData {
-  const { data: urlData } = supabase.storage.from('images').getPublicUrl(img.storage_path);
-  
+  const { data: urlData } = supabase.storage
+    .from('images')
+    .getPublicUrl(img.storage_path);
+
   return {
     id: img.id,
     publicUrl: urlData.publicUrl,
@@ -109,7 +146,9 @@ function mapImageToData(supabase: any, img: ImageRecord): ImageData {
   };
 }
 
-export async function uploadImage(input: UploadImageInput): Promise<UploadResult> {
+export async function uploadImage(
+  input: UploadImageInput
+): Promise<UploadResult> {
   try {
     const validated = imageUploadSchema.safeParse(input);
 
@@ -126,7 +165,10 @@ export async function uploadImage(input: UploadImageInput): Promise<UploadResult
     const { user, supabase } = await getAuthenticatedUser();
 
     if (!user) {
-      return { success: false, message: 'You must be logged in to upload images.' };
+      return {
+        success: false,
+        message: 'You must be logged in to upload images.',
+      };
     }
 
     const { file, originalFilename, altText, width, height } = validated.data;
@@ -149,10 +191,15 @@ export async function uploadImage(input: UploadImageInput): Promise<UploadResult
       });
 
     if (uploadError) {
-      return { success: false, message: 'Failed to upload file. Please try again.' };
+      return {
+        success: false,
+        message: 'Failed to upload file. Please try again.',
+      };
     }
 
-    const { data: urlData } = supabase.storage.from('images').getPublicUrl(storagePath);
+    const { data: urlData } = supabase.storage
+      .from('images')
+      .getPublicUrl(storagePath);
 
     const { error: dbError } = await supabase.from('images').insert({
       id: imageId,
@@ -182,12 +229,17 @@ export async function uploadImage(input: UploadImageInput): Promise<UploadResult
   }
 }
 
-export async function deleteImage(imageId: string): Promise<{ success: boolean; message: string }> {
+export async function deleteImage(
+  imageId: string
+): Promise<{ success: boolean; message: string }> {
   try {
     const { user, supabase } = await getAuthenticatedUser();
 
     if (!user) {
-      return { success: false, message: 'You must be logged in to delete images.' };
+      return {
+        success: false,
+        message: 'You must be logged in to delete images.',
+      };
     }
 
     const { data: image, error: fetchError } = await supabase
@@ -201,7 +253,10 @@ export async function deleteImage(imageId: string): Promise<{ success: boolean; 
     }
 
     if (image.user_id !== user.id) {
-      return { success: false, message: 'You do not have permission to delete this image.' };
+      return {
+        success: false,
+        message: 'You do not have permission to delete this image.',
+      };
     }
 
     const { error: storageError } = await supabase.storage
@@ -245,7 +300,7 @@ export async function getUserImages(): Promise<{
       return { success: false, message: 'Failed to fetch images.' };
     }
 
-    const imagesWithUrls: ImageData[] = images.map((img: ImageRecord) => 
+    const imagesWithUrls: ImageData[] = images.map((img: ImageRecord) =>
       mapImageToData(supabase, img)
     );
 

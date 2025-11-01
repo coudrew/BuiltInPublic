@@ -34,7 +34,7 @@ export default function ProjectCard({
                 alt={name || 'Project image'}
                 fill
                 className='object-cover'
-                sizes="128px"
+                sizes='128px'
               />
             ) : (
               <div className='w-full h-full flex items-center justify-center bg-linear-to-br from-purple-500/20 to-blue-500/20'>

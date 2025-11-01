@@ -14,7 +14,8 @@ import { ValidationError } from 'utils/errors/ValidationError';
 
 const projectQueryKeys = {
   all: ['project'] as const,
-  projectId: (projectId: string) => [...projectQueryKeys.all, projectId] as const,
+  projectId: (projectId: string) =>
+    [...projectQueryKeys.all, projectId] as const,
   username: (username: string) => [...projectQueryKeys.all, username] as const,
 };
 

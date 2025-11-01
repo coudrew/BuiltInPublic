@@ -46,11 +46,13 @@ export function CreateProjectButton({ canEdit = true }: { canEdit?: boolean }) {
       UINotification.error('You must be logged in to create a project');
       return;
     }
-    
+
     try {
-      await createMutation.mutateAsync(
-        { formData, ownerId: user.id, username: user.username || '' }
-      );
+      await createMutation.mutateAsync({
+        formData,
+        ownerId: user.id,
+        username: user.username || '',
+      });
     } catch (error: any) {
       if (error?.message === 'NEXT_REDIRECT') {
         // Redirect is handled by the server action

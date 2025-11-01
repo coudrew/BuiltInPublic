@@ -12,20 +12,28 @@ import {
 describe('imageUtils', () => {
   describe('validateFileType', () => {
     it('should accept valid image types (JPEG, PNG, WebP)', () => {
-      const jpeg = new File(['fake-content'], 'test.jpg', { type: 'image/jpeg' });
+      const jpeg = new File(['fake-content'], 'test.jpg', {
+        type: 'image/jpeg',
+      });
       const png = new File(['fake-content'], 'test.png', { type: 'image/png' });
-      const webp = new File(['fake-content'], 'test.webp', { type: 'image/webp' });
-      
+      const webp = new File(['fake-content'], 'test.webp', {
+        type: 'image/webp',
+      });
+
       expect(validateFileType(jpeg)).toBe(true);
       expect(validateFileType(png)).toBe(true);
       expect(validateFileType(webp)).toBe(true);
     });
 
     it('should reject invalid file types', () => {
-      const pdf = new File(['fake-content'], 'test.pdf', { type: 'application/pdf' });
+      const pdf = new File(['fake-content'], 'test.pdf', {
+        type: 'application/pdf',
+      });
       const noExt = new File(['fake-content'], 'test', { type: 'image/jpeg' });
-      const wrongMime = new File(['fake-content'], 'test.jpg', { type: 'text/plain' });
-      
+      const wrongMime = new File(['fake-content'], 'test.jpg', {
+        type: 'text/plain',
+      });
+
       expect(validateFileType(pdf)).toBe(false);
       expect(validateFileType(noExt)).toBe(false);
       expect(validateFileType(wrongMime)).toBe(false);

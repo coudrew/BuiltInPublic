@@ -9,7 +9,10 @@ export const imageUploadSchema = z.object({
   file: z
     .instanceof(File)
     .refine(
-      (file) => IMAGE_CONFIG.ALLOWED_TYPES.includes(file.type as typeof IMAGE_CONFIG.ALLOWED_TYPES[number]),
+      (file) =>
+        IMAGE_CONFIG.ALLOWED_TYPES.includes(
+          file.type as (typeof IMAGE_CONFIG.ALLOWED_TYPES)[number]
+        ),
       'Invalid file type. Only JPEG, PNG, and WebP are allowed.'
     )
     .refine(

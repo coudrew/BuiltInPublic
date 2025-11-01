@@ -41,9 +41,9 @@ describe('Use case - EditProject', () => {
   it('returns success: false and a message if update fails', async () => {
     const editProject = new EditProject(mockSupabaseFails);
 
-    const actual = await editProject.execute({ 
+    const actual = await editProject.execute({
       projectId: 'test-id',
-      name: 'Some Name' // Provide at least one field to update
+      name: 'Some Name', // Provide at least one field to update
     });
 
     expect(actual.success).toBe(false);
