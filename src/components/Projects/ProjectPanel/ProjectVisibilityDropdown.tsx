@@ -17,7 +17,7 @@ const PROJECT_VISIBILITIES: { value: ProjectVisibility; label: string }[] = [
 
 export function ProjectVisibilityDropdown() {
   const { id, visibility } = useProjectContext();
-  const mutation = useEditProject(id);
+  const mutation = useEditProject();
 
   const handleVisibilityChange = useCallback(
     (newVisibility: ProjectVisibility) => {

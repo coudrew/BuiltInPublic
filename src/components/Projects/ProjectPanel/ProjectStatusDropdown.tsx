@@ -26,7 +26,7 @@ const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
 
 export function ProjectStatusDropdown() {
   const { id, status } = useProjectContext();
-  const mutation = useEditProject(id);
+  const mutation = useEditProject();
 
   const handleStatusChange = useCallback(
     (newStatus: ProjectStatus) => {
