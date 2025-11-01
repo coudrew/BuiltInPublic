@@ -274,6 +274,13 @@ export async function deleteImage(
       .from('images')
       .remove([image.storage_path]);
 
+    if (storageError) {
+      return {
+        success: false,
+        message: 'Failed to delete image file from storage.',
+      };
+    }
+
     const { error: dbError } = await supabase
       .from('images')
       .delete()

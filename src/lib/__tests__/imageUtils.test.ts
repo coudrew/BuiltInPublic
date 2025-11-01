@@ -60,7 +60,6 @@ describe('imageUtils', () => {
   describe('convertToWebP', () => {
     let mockCanvas: HTMLCanvasElement;
     let mockContext: CanvasRenderingContext2D;
-    let mockImage: HTMLImageElement;
 
     beforeEach(() => {
       // Mock canvas and context
@@ -151,7 +150,7 @@ describe('imageUtils', () => {
         type: 'image/jpeg',
       });
 
-      const result = await convertToWebP(file);
+      await convertToWebP(file);
 
       expect(mockCanvas.width).toBe(IMAGE_CONFIG.MAX_DIMENSION);
       const aspectRatio = mockCanvas.width / mockCanvas.height;

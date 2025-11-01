@@ -335,19 +335,22 @@ export default function ImageUploadModal({
                       disabled={isAlreadySelected}
                     >
                       {!isAlreadySelected && (
-                        <div
+                        <button
+                          type='button'
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteImage(img.id, e);
                           }}
-                          className='absolute top-1 right-1 z-10 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50 cursor-pointer'
+                          disabled={deleteMutation.isPending}
+                          aria-label='Delete image'
+                          className='absolute top-1 right-1 z-10 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
                         >
                           {deleteMutation.isPending ? (
                             <Loader2 className='h-3 w-3 animate-spin' />
                           ) : (
                             <X className='h-3 w-3' />
                           )}
-                        </div>
+                        </button>
                       )}
                       <Image
                         src={img.publicUrl}

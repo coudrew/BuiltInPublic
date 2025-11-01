@@ -98,7 +98,7 @@ export class UpdateProject extends BaseMutationUseCase<
 
       if (primaryImageData?.storage_path) {
         const { data } = this.supabase.storage
-          .from('project-images')
+          .from('images')
           .getPublicUrl(primaryImageData.storage_path);
         primaryImageUrl = data.publicUrl;
       }
@@ -116,7 +116,7 @@ export class UpdateProject extends BaseMutationUseCase<
       if (galleryImagesData) {
         galleryImageUrls = galleryImagesData.map((img) => {
           const { data } = this.supabase.storage
-            .from('project-images')
+            .from('images')
             .getPublicUrl(img.storage_path);
           return data.publicUrl;
         });
