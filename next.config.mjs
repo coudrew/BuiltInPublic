@@ -25,8 +25,8 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: isProdOrStaging
-              ? "default-src 'self'; script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com; style-src 'self'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://us.i.posthog.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
-              : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws://localhost:* http://localhost:*; frame-ancestors 'self'; base-uri 'self'; form-action 'self';",
+              ? "default-src 'self'; script-src 'self' 'unsafe-inline' https://us-assets.i.posthog.com; style-src 'self'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://us.i.posthog.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+              : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' ws://localhost:* http://localhost:*; frame-ancestors 'self'; base-uri 'self'; form-action 'self';",
           },
 
           // ✅ X-Frame-Options
@@ -91,6 +91,17 @@ const nextConfig = {
       {
         hostname: 'img.freepik.com',
         protocol: 'https',
+      },
+      // Allow local Supabase storage host used in development
+      {
+        hostname: '127.0.0.1',
+        protocol: 'http',
+        port: '54321',
+      },
+      {
+        hostname: 'localhost',
+        protocol: 'http',
+        port: '54321',
       },
     ],
   },

@@ -30,6 +30,8 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
       visibility,
       status,
       external_url,
+      primary_image,
+      gallery_images,
       created_at,
       updates,
     } = row;
@@ -45,6 +47,8 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
       visibility,
       status,
       externalUrl: external_url || '',
+      primaryImage: primary_image || undefined,
+      galleryImages: gallery_images || undefined,
       createdAt: created_at,
       updates: updates || [],
     } satisfies Project;
@@ -74,9 +78,6 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
 
       return project;
     } catch (e) {
-      console.error(
-        `Failed to fetch project with: ${JSON.stringify(e, null, 2)} id: ${id}`
-      );
       throw e;
     }
   }
@@ -90,7 +91,6 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
       }).maybeSingle();
 
       if (error) {
-        console.error(error);
         throw error;
       }
 
@@ -102,9 +102,6 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
 
       return project;
     } catch (e) {
-      console.error(
-        `Failed to fetch project with: ${JSON.stringify(e, null, 2)} id: ${id}`
-      );
       throw e;
     }
   }
@@ -134,9 +131,6 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
 
       return projects;
     } catch (e) {
-      console.error(
-        `Failed to fetch projects with: ${JSON.stringify(e, null, 2)} for username: ${username}`
-      );
       throw e;
     }
   }

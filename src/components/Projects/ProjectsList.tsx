@@ -21,6 +21,7 @@ export function ProjectsList() {
           name={project.name}
           description={project.description}
           status={project.status}
+          primaryImage={project.primaryImage}
           href={
             canEdit
               ? `/${profile.username}/project/${project.id}`

@@ -29,20 +29,21 @@ export async function createProject(params: CreateProjectParams) {
       errors[path].push(issue.message);
     }
 
-    return { success: false, errors };
-  } else {
-    const supabase = await createAnonClient();
-    const createNewProject = new CreateNewProject(supabase);
-
-    const { success, message, projectId } = await createNewProject.execute({
-      ...safeParams.data,
-      ownerId,
-    });
-
-    if (!success) {
-      return { success, message };
-    }
-
-    redirect(`/${username}/project/${projectId}`);
+    throw new Error(JSON.stringify({ success: false, errors }));
   }
+
+  const supabase = await createAnonClient();
+  const createNewProject = new CreateNewProject(supabase);
+
+  const { success, message, projectId } = await createNewProject.execute({
+    ...safeParams.data,
+    ownerId,
+  });
+
+  if (!success) {
+    throw new Error(message || 'Failed to create project');
+  }
+
+  // Redirect will throw NEXT_REDIRECT error which we'll catch in the component
+  redirect(`/${username}/project/${projectId}`);
 }

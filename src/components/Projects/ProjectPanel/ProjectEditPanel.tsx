@@ -15,12 +15,13 @@ import { ProjectTitle } from './ProjectTitle';
 import { ProjectDescription } from './ProjectDescription';
 import { ProjectUpdateButton } from './ProjectUpdateButton';
 import ProjectDeleteButton from '@/components/Projects/ProjectPanel/ProjectDeleteButton';
+import { ProjectImages } from './ProjectImages';
 
 export function ProjectEditPanel() {
   const { name, updates } = useProjectContext();
 
   return (
-    <section className='flex flex-col h-fit md:h-screen gap-2'>
+    <section className='flex flex-col gap-4 pb-8'>
       <Card className='w-full'>
         <CardHeader className='flex flex-col md:flex-row md:justify-between md:items-center'>
           <ProjectTitle />
@@ -31,14 +32,19 @@ export function ProjectEditPanel() {
         </CardHeader>
         <CardContent>
           <CardDescription className='sr-only'>{`Details of project named: ${name}`}</CardDescription>
-          <ProjectDescription />
-          <div className='flex gap-2'>
-            <ProjectUpdateButton />
-            <ProjectDeleteButton />
+          <div className='space-y-6'>
+            <ProjectDescription />
+            <div className='flex gap-2'>
+              <ProjectUpdateButton />
+              <ProjectDeleteButton />
+            </div>
           </div>
         </CardContent>
       </Card>
-      <div className='flex flex-col gap-2 overflow-scroll scroll-hide h-fit md:h-[78vh]'>
+
+      <ProjectImages canEdit />
+
+      <div className='flex flex-col gap-2'>
         {updates?.map((update) => (
           <ProjectUpdateCard
             key={`${name}-update-${update.id}`}

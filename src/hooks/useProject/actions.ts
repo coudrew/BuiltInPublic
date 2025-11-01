@@ -98,22 +98,25 @@ export async function updateProject(params: UpdateProjectParams) {
       errors[path].push(issue.message);
     }
     throw new ValidationError('Validation failed', errors);
-  } else {
-    const supabase = await createAnonClient();
-
-    const updateProject = new UpdateProject(supabase);
-
-    const result = await updateProject.execute({
-      projectId,
-      ...validatedUpdate.data,
-    });
-
-    if (!result.success) {
-      throw new Error(result.message);
-    }
-
-    return result;
   }
+
+  const supabase = await createAnonClient();
+  const updateProjectUseCase = new UpdateProject(supabase);
+
+  const result = await updateProjectUseCase.execute({
+    projectId,
+    ...validatedUpdate.data,
+  });
+
+  if (!result) {
+    throw new Error('Failed to update project');
+  }
+
+  return {
+    success: true,
+    message: 'Project updated successfully!',
+    data: result,
+  };
 }
 
 export async function deleteProject(
@@ -129,7 +132,6 @@ export async function deleteProject(
   });
 
   if (!result.success) {
-    console.error('Delete failed:', result.message);
     throw new Error(result.message);
   }
 

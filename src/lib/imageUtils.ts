@@ -3,11 +3,12 @@
  * Handles WebP conversion, resizing, and validation
  */
 
-// Allowed MIME types (SR-IMG-006)
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; 
-const MAX_DIMENSION = 2000; // pixels
-const QUALITY = 0.85; // WebP quality
+export const IMAGE_CONFIG = {
+  ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
+  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  MAX_DIMENSION: 2000,
+  QUALITY: 0.85,
+} as const;
 
 export interface ConversionOptions {
   maxDimension?: number;
@@ -24,38 +25,40 @@ export interface ConversionResult {
 
 /**
  * Validates file type using MIME type check
+ * SR-IMG-006, SR-IMG-008
  */
 export function validateFileType(file: File): boolean {
-  // Check MIME type
-  if (!ALLOWED_TYPES.includes(file.type)) {
+  // Narrow the string type to the literal union from IMAGE_CONFIG for the includes check
+  if (
+    !IMAGE_CONFIG.ALLOWED_TYPES.includes(
+      file.type as (typeof IMAGE_CONFIG.ALLOWED_TYPES)[number]
+    )
+  ) {
     return false;
   }
-  
-  // Check extension
+
   const extension = file.name.split('.').pop()?.toLowerCase();
   const validExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-  
+
   return extension ? validExtensions.includes(extension) : false;
 }
 
 /**
  * Validates file size
- * SR-IMG-007
  */
 export function validateFileSize(file: File): boolean {
-  return file.size <= MAX_FILE_SIZE;
+  return file.size <= IMAGE_CONFIG.MAX_FILE_SIZE;
 }
 
 /**
  * Converts image to WebP format with resizing and compression
- * SR-IMG-017 - Critical for server action size limits!
  */
 export async function convertToWebP(
   file: File,
   options: ConversionOptions = {}
 ): Promise<ConversionResult> {
-  const maxDimension = options.maxDimension || MAX_DIMENSION;
-  const quality = options.quality || QUALITY;
+  const maxDimension = options.maxDimension || IMAGE_CONFIG.MAX_DIMENSION;
+  const quality = options.quality || IMAGE_CONFIG.QUALITY;
 
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -68,9 +71,8 @@ export async function convertToWebP(
     }
 
     img.onload = () => {
-      // Calculate new dimensions while maintaining aspect ratio
       let { width, height } = img;
-      
+
       if (width > maxDimension || height > maxDimension) {
         if (width > height) {
           height = (height / width) * maxDimension;
@@ -81,13 +83,10 @@ export async function convertToWebP(
         }
       }
 
-      // Set canvas dimensions
       canvas.width = Math.round(width);
       canvas.height = Math.round(height);
-
-      // Draw and convert to WebP
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
+
       canvas.toBlob(
         (blob) => {
           if (!blob) {
@@ -95,7 +94,6 @@ export async function convertToWebP(
             return;
           }
 
-          // Create new File object
           const webpFile = new File(
             [blob],
             file.name.replace(/\.[^.]+$/, '.webp'),
@@ -115,18 +113,13 @@ export async function convertToWebP(
       );
     };
 
-    img.onerror = () => {
-      reject(new Error('Failed to load image'));
-    };
+    img.onerror = () => reject(new Error('Failed to load image'));
 
-    // Load the image
     const reader = new FileReader();
     reader.onload = (e) => {
       img.src = e.target?.result as string;
     };
-    reader.onerror = () => {
-      reject(new Error('Failed to read file'));
-    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
 }
@@ -139,18 +132,18 @@ export async function processImages(
   options: ConversionOptions = {}
 ): Promise<ConversionResult[]> {
   const results: ConversionResult[] = [];
-  
+
   for (const file of files) {
-    // Validate type and size
     if (!validateFileType(file)) {
-      throw new Error(`Invalid file type: ${file.name}. Only JPEG, PNG, and WebP are allowed.`);
+      throw new Error(
+        `Invalid file type: ${file.name}. Only JPEG, PNG, and WebP are allowed.`
+      );
     }
     
     if (!validateFileSize(file)) {
       throw new Error(`File too large: ${file.name}. Maximum size is 10MB.`);
     }
 
-    // Convert to WebP
     const result = await convertToWebP(file, options);
     results.push(result);
   }

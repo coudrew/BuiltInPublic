@@ -1,22 +1,21 @@
 'use client';
-import useUser from '@/hooks/useUser/useUser';
 import Image from 'next/image';
 
-export default function ProfileIcon() {
-  const { data } = useUser();
+interface ProfileIconProps {
+  url?: string | null;
+  className?: string;
+}
 
-  if (!data?.id) {
-    return null;
-  }
-
+export default function ProfileIcon({ url, className = '' }: ProfileIconProps) {
   return (
-    <div>
+    <div className='relative w-full h-full overflow-hidden'>
       <Image
-        src={data.avatarUrl || '/default-avatar.png'}
-        alt={data.username || 'User profile'}
-        width={50}
-        height={50}
-        className='rounded-full'
+        src={url || '/default-avatar.png'}
+        alt='User profile'
+        fill
+        sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+        priority
+        className={`rounded-full object-cover ${className}`}
       />
     </div>
   );
