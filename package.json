@@ -13,11 +13,11 @@
     "test": "vitest --exclude **/rls-policies",
     "test:rls": "vitest /rls-policies",
     "test:watch": "vitest --watch",
-    "db:migrate": "supabase db reset",
-    "db:seed": "tsx scripts/seed.ts",
+    "db:migrate": "pnpm exec supabase db reset",
+    "db:seed": "pnpm exec tsx scripts/seed.ts",
     "db:setup": "pnpm db:migrate && pnpm db:seed",
     "start:dev": "pnpm db:setup && pnpm dev",
-    "generate:types": "tsx scripts/generateSupabaseTypes.ts"
+    "generate:types": "pnpm exec tsx scripts/generateSupabaseTypes.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -40,6 +40,7 @@
     "lucide-react": "^0.542.0",
     "next": "^15.5.2",
     "next-themes": "^0.4.6",
+    "pnpm": "^10.20.0",
     "posthog-js": "^1.260.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
