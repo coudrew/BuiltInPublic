@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -153,7 +153,11 @@ export type Database = {
     Enums: {
       consent_methods: "checkbox" | "button_clicked"
       policy_doc_types: "T&C" | "cookies" | "privacy" | "disclaimer"
-      revocation_reasons: "user_request" | "account_deletion" | "other"
+      revocation_reasons:
+        | "user_request"
+        | "account_deletion"
+        | "other"
+        | "superseded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -302,6 +306,50 @@ export type Database = {
           {
             foreignKeyName: "follows_follower_id_fkey"
             columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          file_size: number | null
+          height: number | null
+          id: string
+          original_filename: string | null
+          storage_path: string
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          file_size?: number | null
+          height?: number | null
+          id?: string
+          original_filename?: string | null
+          storage_path: string
+          user_id: string
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          file_size?: number | null
+          height?: number | null
+          id?: string
+          original_filename?: string | null
+          storage_path?: string
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "images_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -481,9 +529,11 @@ export type Database = {
           created_at: string
           description: string | null
           external_url: string | null
+          gallery_images: string[] | null
           id: string
           name: string
           owner_id: string
+          primary_image: string | null
           status: Database["public"]["Enums"]["project_status"]
           updated_at: string
           visibility: Database["public"]["Enums"]["project_visibility"]
@@ -492,9 +542,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           external_url?: string | null
+          gallery_images?: string[] | null
           id?: string
           name: string
           owner_id: string
+          primary_image?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
           visibility?: Database["public"]["Enums"]["project_visibility"]
@@ -503,9 +555,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           external_url?: string | null
+          gallery_images?: string[] | null
           id?: string
           name?: string
           owner_id?: string
+          primary_image?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           updated_at?: string
           visibility?: Database["public"]["Enums"]["project_visibility"]
@@ -683,7 +737,12 @@ export const Constants = {
     Enums: {
       consent_methods: ["checkbox", "button_clicked"],
       policy_doc_types: ["T&C", "cookies", "privacy", "disclaimer"],
-      revocation_reasons: ["user_request", "account_deletion", "other"],
+      revocation_reasons: [
+        "user_request",
+        "account_deletion",
+        "other",
+        "superseded",
+      ],
     },
   },
   public: {

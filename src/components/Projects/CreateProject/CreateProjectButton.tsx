@@ -24,9 +24,8 @@ import useUser from '@/hooks/useUser/useUser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createProject } from './actions';
 import UINotification from '@/services/UINotification.service';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { useCreateProject } from '@/hooks/useProject/useProject';
 
 export function CreateProjectButton({ canEdit = true }: { canEdit?: boolean }) {
@@ -43,21 +42,26 @@ export function CreateProjectButton({ canEdit = true }: { canEdit?: boolean }) {
   });
 
   const submit = async (formData: CreateProjectSchema) => {
-    if (user?.id) {
-      createMutation.mutate(
-        { formData, ownerId: user.id, username: user.username || '' },
-        {
-          onError: (error) => {
-            if (error?.message === 'NEXT_REDIRECT') {
-              return;
-            } else if (error?.message) {
-              UINotification.error(error.message);
-            } else {
-              UINotification.error('Error creating project');
-            }
-          },
-        }
-      );
+    if (!user?.id) {
+      UINotification.error('You must be logged in to create a project');
+      return;
+    }
+
+    try {
+      await createMutation.mutateAsync({
+        formData,
+        ownerId: user.id,
+        username: user.username || '',
+      });
+    } catch (error: any) {
+      if (error?.message === 'NEXT_REDIRECT') {
+        // Redirect is handled by the server action
+        return;
+      } else if (error?.message) {
+        UINotification.error(error.message);
+      } else {
+        UINotification.error('Error creating project');
+      }
     }
   };
 
@@ -68,7 +72,10 @@ export function CreateProjectButton({ canEdit = true }: { canEdit?: boolean }) {
   const disableSubmit =
     !form.formState.isValid ||
     form.formState.isSubmitting ||
-    form.formState.isSubmitted;
+    form.formState.isSubmitted ||
+    createMutation.isPending;
+
+  const isCreating = form.formState.isSubmitting || createMutation.isPending;
 
   if (!canEdit) {
     return null;
@@ -98,22 +105,41 @@ export function CreateProjectButton({ canEdit = true }: { canEdit?: boolean }) {
             <DialogHeader>
               <DialogTitle>{'Create Project'}</DialogTitle>
             </DialogHeader>
-            <FormField
-              control={form.control}
-              name={'name'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{'Project Name'}</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter project title...' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button className='self-end' disabled={disableSubmit} type='submit'>
-              Create
-            </Button>
+            <div className='space-y-4'>
+              <FormField
+                control={form.control}
+                name={'name'}
+                render={({ field }) => (
+                  <FormItem className='space-y-2'>
+                    <FormLabel>{'Project Name'}</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter project title...' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className='flex items-center gap-3 justify-end pt-4'>
+                <Button
+                  className='self-end min-w-40'
+                  disabled={disableSubmit}
+                  type='submit'
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 className='w-4 h-4 animate-spin mr-2' />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      Create Project
+                      <Plus className='w-4 h-4 ml-2' />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </form>
         </Form>
       </DialogContent>

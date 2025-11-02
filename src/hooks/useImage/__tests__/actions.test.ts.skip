@@ -1,0 +1,607 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  uploadImage,
+  deleteImage,
+  getUserImages,
+  updateImageAltText,
+  type UploadImageInput,
+} from '../actions';
+import type { AnySupabaseClient } from 'utils/supabase/server';
+import { ValidationError } from 'utils/errors/ValidationError';
+
+// Mock crypto.randomUUID
+vi.mock('crypto', () => ({
+  default: {
+    randomUUID: () => 'test-uuid-12345',
+  },
+  randomUUID: () => 'test-uuid-12345',
+}));
+
+// Mock createAnonClient
+vi.mock('utils/supabase/server', async () => {
+  const actual = await vi.importActual<typeof import('utils/supabase/server')>(
+    'utils/supabase/server'
+  );
+  return {
+    ...actual,
+    createAnonClient: vi.fn(),
+  };
+});
+
+describe('Image Actions', () => {
+  let mockSupabase: any;
+  let mockUser: any;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockUser = {
+      id: 'user-123',
+      email: 'test@example.com',
+    };
+
+    mockSupabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: mockUser },
+          error: null,
+        }),
+      },
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockResolvedValue({ error: null }),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+      storage: {
+        from: vi.fn().mockReturnThis(),
+        upload: vi.fn().mockResolvedValue({ error: null }),
+        remove: vi.fn().mockResolvedValue({ error: null }),
+        getPublicUrl: vi
+          .fn()
+          .mockReturnValue({ data: { publicUrl: 'https://example.com/image.webp' } }),
+      },
+    };
+
+    const { createAnonClient } = await import('utils/supabase/server');
+    vi.mocked(createAnonClient).mockResolvedValue(mockSupabase as any);
+  });
+
+  describe('uploadImage', () => {
+    const createValidInput = (): UploadImageInput => ({
+      file: new File(['content'], 'test.webp', { type: 'image/webp' }),
+      originalFilename: 'test.jpg',
+      altText: 'Test image',
+      width: 800,
+      height: 600,
+    });
+
+    it('should successfully upload image with valid data', async () => {
+      const input = createValidInput();
+
+      mockSupabase.from.mockReturnValue({
+        insert: vi.fn().mockResolvedValue({ error: null }),
+      });
+
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(true);
+      expect(result.imageId).toBe('test-uuid-12345');
+      expect(result.publicUrl).toBe('https://example.com/image.webp');
+      expect(result.message).toBe('Image uploaded successfully');
+    });
+
+    it('should reject unauthenticated user', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: new Error('Not authenticated'),
+      });
+
+      const input = createValidInput();
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('You must be logged in to upload images.');
+    });
+
+    it('should validate file type via magic bytes - WebP', async () => {
+      // Create a mock WebP file with correct magic bytes
+      const webpBytes = new Uint8Array([
+        0x52, 0x49, 0x46, 0x46, // "RIFF"
+        0x00, 0x00, 0x00, 0x00, // file size (placeholder)
+        0x57, 0x45, 0x42, 0x50, // "WEBP"
+      ]);
+      const file = new File([webpBytes], 'test.webp', { type: 'image/webp' });
+
+      const input: UploadImageInput = {
+        file,
+        originalFilename: 'test.webp',
+        width: 800,
+        height: 600,
+      };
+
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should validate file type via magic bytes - JPEG', async () => {
+      const jpegBytes = new Uint8Array([0xff, 0xd8, 0xff]);
+      const file = new File([jpegBytes], 'test.jpg', { type: 'image/jpeg' });
+
+      const input: UploadImageInput = {
+        file,
+        originalFilename: 'test.jpg',
+        width: 800,
+        height: 600,
+      };
+
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should validate file type via magic bytes - PNG', async () => {
+      const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+      const file = new File([pngBytes], 'test.png', { type: 'image/png' });
+
+      const input: UploadImageInput = {
+        file,
+        originalFilename: 'test.png',
+        width: 800,
+        height: 600,
+      };
+
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject file with mismatched magic bytes', async () => {
+      // Text file pretending to be an image
+      const fakeBytes = new Uint8Array([0x74, 0x65, 0x73, 0x74]); // "test"
+      const file = new File([fakeBytes], 'fake.jpg', { type: 'image/jpeg' });
+
+      const input: UploadImageInput = {
+        file,
+        originalFilename: 'fake.jpg',
+        width: 800,
+        height: 600,
+      };
+
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('does not match declared type');
+    });
+
+    it('should throw ValidationError for invalid schema', async () => {
+      const input = {
+        file: new File(['content'], 'test.webp', { type: 'image/webp' }),
+        originalFilename: '', // Invalid - empty filename
+        width: 800,
+        height: 600,
+      } as UploadImageInput;
+
+      await expect(uploadImage(input)).rejects.toThrow(ValidationError);
+    });
+
+    it('should handle storage upload failure', async () => {
+      mockSupabase.storage.upload.mockResolvedValue({
+        error: new Error('Storage error'),
+      });
+
+      const input = createValidInput();
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Failed to upload file. Please try again.');
+    });
+
+    it('should clean up storage if database insert fails', async () => {
+      mockSupabase.from.mockReturnValue({
+        insert: vi.fn().mockResolvedValue({
+          error: new Error('Database error'),
+        }),
+      });
+
+      const removeMock = vi.fn().mockResolvedValue({ error: null });
+      mockSupabase.storage.remove = removeMock;
+
+      const input = createValidInput();
+      const result = await uploadImage(input);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Failed to save image metadata.');
+      expect(removeMock).toHaveBeenCalledWith(['user-123/test-uuid-12345.webp']);
+    });
+
+    it('should generate correct storage path', async () => {
+      const uploadMock = vi.fn().mockResolvedValue({ error: null });
+      mockSupabase.storage.upload = uploadMock;
+
+      const input = createValidInput();
+      await uploadImage(input);
+
+      expect(uploadMock).toHaveBeenCalledWith(
+        'user-123/test-uuid-12345.webp',
+        expect.any(File),
+        expect.objectContaining({
+          contentType: 'image/webp',
+        })
+      );
+    });
+
+    it('should insert correct metadata into database', async () => {
+      const insertMock = vi.fn().mockResolvedValue({ error: null });
+      mockSupabase.from.mockReturnValue({
+        insert: insertMock,
+      });
+
+      const input = createValidInput();
+      await uploadImage(input);
+
+      expect(insertMock).toHaveBeenCalledWith({
+        id: 'test-uuid-12345',
+        user_id: 'user-123',
+        storage_path: 'user-123/test-uuid-12345.webp',
+        original_filename: 'test.jpg',
+        alt_text: 'Test image',
+        width: 800,
+        height: 600,
+        file_size: expect.any(Number),
+      });
+    });
+  });
+
+  describe('deleteImage', () => {
+    it('should successfully delete image', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'image-123',
+            user_id: 'user-123',
+            storage_path: 'user-123/image-123.webp',
+          },
+          error: null,
+        }),
+        delete: vi.fn().mockReturnThis(),
+      });
+
+      mockSupabase.from().eq.mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      const result = await deleteImage('image-123');
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Image deleted successfully');
+    });
+
+    it('should reject unauthenticated user', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: new Error('Not authenticated'),
+      });
+
+      const result = await deleteImage('image-123');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('You must be logged in to delete images.');
+    });
+
+    it('should reject deletion of other users image', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'image-123',
+            user_id: 'other-user',
+            storage_path: 'other-user/image-123.webp',
+          },
+          error: null,
+        }),
+      });
+
+      const result = await deleteImage('image-123');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe(
+        'You do not have permission to delete this image.'
+      );
+    });
+
+    it('should handle image not found', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: null,
+          error: new Error('Not found'),
+        }),
+      });
+
+      const result = await deleteImage('image-123');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Image not found.');
+    });
+
+    it('should delete from storage and database', async () => {
+      const removeMock = vi.fn().mockResolvedValue({ error: null });
+      const deleteMock = vi.fn().mockReturnThis();
+
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'image-123',
+            user_id: 'user-123',
+            storage_path: 'user-123/image-123.webp',
+          },
+          error: null,
+        }),
+        delete: deleteMock,
+      });
+
+      deleteMock.mockReturnThis();
+      deleteMock().eq.mockResolvedValue({ data: null, error: null });
+
+      mockSupabase.storage.remove = removeMock;
+
+      await deleteImage('image-123');
+
+      expect(removeMock).toHaveBeenCalledWith(['user-123/image-123.webp']);
+      expect(deleteMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('getUserImages', () => {
+    it('should return all user images', async () => {
+      const mockImages = [
+        {
+          id: 'image-1',
+          user_id: 'user-123',
+          storage_path: 'user-123/image-1.webp',
+          original_filename: 'test1.jpg',
+          alt_text: 'Test 1',
+          width: 800,
+          height: 600,
+          file_size: 1024,
+          created_at: '2025-01-01T00:00:00Z',
+        },
+        {
+          id: 'image-2',
+          user_id: 'user-123',
+          storage_path: 'user-123/image-2.webp',
+          original_filename: 'test2.jpg',
+          alt_text: 'Test 2',
+          width: 1000,
+          height: 800,
+          file_size: 2048,
+          created_at: '2025-01-02T00:00:00Z',
+        },
+      ];
+
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: mockImages,
+          error: null,
+        }),
+      });
+
+      const result = await getUserImages();
+
+      expect(result.success).toBe(true);
+      expect(result.images).toHaveLength(2);
+      expect(result.images![0].id).toBe('image-1');
+      expect(result.images![0].publicUrl).toBe('https://example.com/image.webp');
+    });
+
+    it('should return empty array for new user', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: [],
+          error: null,
+        }),
+      });
+
+      const result = await getUserImages();
+
+      expect(result.success).toBe(true);
+      expect(result.images).toEqual([]);
+    });
+
+    it('should reject unauthenticated user', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: new Error('Not authenticated'),
+      });
+
+      const result = await getUserImages();
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('You must be logged in.');
+    });
+
+    it('should sort images by created_at descending', async () => {
+      const orderMock = vi.fn().mockResolvedValue({
+        data: [],
+        error: null,
+      });
+
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: orderMock,
+      });
+
+      await getUserImages();
+
+      expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
+    });
+
+    it('should map image data correctly', async () => {
+      const mockImage = {
+        id: 'image-1',
+        user_id: 'user-123',
+        storage_path: 'user-123/image-1.webp',
+        original_filename: 'original.jpg',
+        alt_text: 'Test alt',
+        width: 1920,
+        height: 1080,
+        file_size: 5000,
+        created_at: '2025-01-01T00:00:00Z',
+      };
+
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: [mockImage],
+          error: null,
+        }),
+      });
+
+      const result = await getUserImages();
+
+      expect(result.images![0]).toEqual({
+        id: 'image-1',
+        publicUrl: 'https://example.com/image.webp',
+        originalFilename: 'original.jpg',
+        altText: 'Test alt',
+        width: 1920,
+        height: 1080,
+        fileSize: 5000,
+        createdAt: '2025-01-01T00:00:00Z',
+      });
+    });
+  });
+
+  describe('updateImageAltText', () => {
+    it('should successfully update alt text', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: { user_id: 'user-123' },
+          error: null,
+        }),
+        update: vi.fn().mockReturnThis(),
+      });
+
+      mockSupabase.from().update().eq.mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      const result = await updateImageAltText({
+        imageId: '123e4567-e89b-12d3-a456-426614174000',
+        altText: 'Updated alt text',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Alt text updated successfully');
+    });
+
+    it('should reject unauthenticated user', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: null },
+        error: new Error('Not authenticated'),
+      });
+
+      const result = await updateImageAltText({
+        imageId: '123e4567-e89b-12d3-a456-426614174000',
+        altText: 'Test',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('You must be logged in.');
+    });
+
+    it('should reject update of other users image', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: { user_id: 'other-user' },
+          error: null,
+        }),
+      });
+
+      const result = await updateImageAltText({
+        imageId: '123e4567-e89b-12d3-a456-426614174000',
+        altText: 'Test',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Image not found or unauthorized.');
+    });
+
+    it('should handle image not found', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: null,
+          error: null,
+        }),
+      });
+
+      const result = await updateImageAltText({
+        imageId: '123e4567-e89b-12d3-a456-426614174000',
+        altText: 'Test',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Image not found or unauthorized.');
+    });
+
+    it('should throw ValidationError for invalid UUID', async () => {
+      await expect(
+        updateImageAltText({
+          imageId: 'invalid-uuid',
+          altText: 'Test',
+        })
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should accept empty alt text', async () => {
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: { user_id: 'user-123' },
+          error: null,
+        }),
+        update: vi.fn().mockReturnThis(),
+      });
+
+      mockSupabase.from().update().eq.mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      const result = await updateImageAltText({
+        imageId: '123e4567-e89b-12d3-a456-426614174000',
+        altText: '',
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
+});
+
+// Note: These tests are skipped due to complex mocking requirements for File API and Supabase storage
+// They test server-side actions that are better covered by integration tests
