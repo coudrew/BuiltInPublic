@@ -14,13 +14,14 @@ export function ProjectsList() {
   }
 
   return (
-    <div className='flex flex-col gap-4 h-fit md:h-[73vh] scroll-hide overflow-scroll'>
+    <div className='flex flex-col gap-4'>
       {data?.map((project) => (
         <ProjectCard
           key={project.id}
           name={project.name}
           description={project.description}
           status={project.status}
+          primaryImage={project.primaryImage}
           href={
             canEdit
               ? `/${profile.username}/project/${project.id}`

@@ -20,7 +20,7 @@ interface ProjectDescriptionFormProps {
 
 function ProjectDescriptionForm({ stopEditing }: ProjectDescriptionFormProps) {
   const { description, id } = useProjectContext();
-  const mutation = useEditProject(id);
+  const mutation = useEditProject();
 
   const form = useForm<EditProjectSchema>({
     resolver: zodResolver(editProjectSchema),

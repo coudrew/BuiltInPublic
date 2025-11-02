@@ -17,6 +17,8 @@ export interface ProjectDTO {
   visibility: ProjectVisibility;
   status: ProjectStatus;
   external_url: string | null;
+  primary_image: string | null;
+  gallery_images: string[] | null;
   created_at: string;
   updates:
     | {
@@ -41,6 +43,8 @@ export interface Project {
   status: ProjectStatus;
   externalUrl?: string;
   createdAt: string;
+  primaryImage?: string;
+  galleryImages?: string[];
   updates:
     | {
         id: string;

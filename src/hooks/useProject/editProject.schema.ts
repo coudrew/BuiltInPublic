@@ -8,6 +8,8 @@ export const editProjectSchema = z.object({
     .optional(),
   visibility: z.enum(['public', 'private']).optional(),
   externalUrl: z.url().optional(),
+  primaryImage: z.string().uuid().or(z.string().url()).optional(),
+  galleryImages: z.array(z.string().uuid().or(z.string().url())).optional(),
 });
 
 export type EditProjectSchema = z.infer<typeof editProjectSchema>;

@@ -9,6 +9,7 @@ export interface UserProfileUpdateData {
   username?: string;
   bio?: string | null;
   display_name?: string;
+  avatar_url?: string | null;
 }
 
 export class UpdateUserProfile extends BaseMutationUseCase<UserProfileUpdateData> {
@@ -20,7 +21,7 @@ export class UpdateUserProfile extends BaseMutationUseCase<UserProfileUpdateData
   }
 
   async execute(params: UserProfileUpdateData) {
-    const { id, username, display_name, bio } = params;
+    const { id, username, display_name, bio, avatar_url } = params;
 
     try {
       if (username) {
@@ -67,6 +68,10 @@ export class UpdateUserProfile extends BaseMutationUseCase<UserProfileUpdateData
 
       if (username !== undefined) {
         updateData.username = username;
+      }
+
+      if (avatar_url !== undefined) {
+        updateData.avatar_url = avatar_url;
       }
 
       // Only proceed if we have fields to update

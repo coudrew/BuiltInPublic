@@ -93,7 +93,9 @@ export default async function RootLayout({
             hideProgressBar={false}
             closeOnClick
             pauseOnHover
+            draggable
             theme='dark'
+            style={{ top: '1rem', right: '1rem' }}
           />
           <Footer />
         </ThemeProvider>
