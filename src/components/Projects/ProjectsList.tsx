@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/pagination';
 
 const PROJECTS_PER_PAGE = 6;
+const MAX_VISIBLE_PAGES = 7;
 
 export function ProjectsList() {
   const { profile, canEdit } = useProfileContext();
@@ -50,7 +51,7 @@ export function ProjectsList() {
   const getPageNumbers = useCallback(() => {
     const pages: (number | string)[] = [];
 
-    if (totalPages <= 7) {
+    if (totalPages <= MAX_VISIBLE_PAGES) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }

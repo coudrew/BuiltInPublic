@@ -118,7 +118,7 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
       // Get total count using a separate count query with proper join
       const { count, error: countError } = await this.supabase
         .from('projects')
-        .select('id, profiles!inner(username)', { count: 'exact', head: true })
+        .select('*, profiles!inner(username)', { count: 'exact', head: true })
         .eq('profiles.username', username);
 
       if (countError) {
@@ -135,7 +135,6 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
         throw error;
       }
 
-      // Use map instead of for loop for better performance
       const projects =
         data?.map((rawProject: ProjectDTO) =>
           this.safeTransformDTO(rawProject)
