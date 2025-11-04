@@ -10,7 +10,7 @@
     "knip": "knip --reporter markdown --no-exit-code > knip-report.md",
     "lint": "next lint",
     "precheck": "bash ./scripts/precheck.sh",
-    "test": "vitest",
+    "test": "vitest --exclude **/rls-policies",
     "test:rls": "vitest run supabase/__tests__/rls-policies",
     "test:watch": "vitest --watch",
     "db:migrate": "pnpm exec supabase db reset",
