@@ -16,23 +16,45 @@ import {
   DeleteProjectParams,
 } from '@/use-cases/projects/DeleteProject';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
+
+// Helper function to handle validation errors
+function handleValidationError(error: z.ZodError): never {
+  const errors: Record<string, string[]> = {};
+
+  for (const issue of error.issues) {
+    const path = issue.path.join('.');
+    if (!errors[path]) {
+      errors[path] = [];
+    }
+    errors[path].push(issue.message);
+  }
+
+  throw new ValidationError('Validation failed', errors);
+}
 
 export async function getProjectById(id: string) {
   const supabase = await createAnonClient();
   const projectRepository = new ProjectRepository(supabase);
 
-  const project = await projectRepository.getById(id);
-
-  return project ?? null;
+  return await projectRepository.getById(id);
 }
 
-export async function getProjectsByUsername(username: string) {
+export async function getProjectsByUsernameWithPagination(
+  username: string,
+  page: number = 1,
+  pageSize: number = 10
+) {
   const supabase = await createAnonClient();
   const projectRepository = new ProjectRepository(supabase);
 
-  const projects = await projectRepository.getProjectsByUsername(username);
+  const result = await projectRepository.getProjectsByUsernameWithPagination(
+    username,
+    page,
+    pageSize
+  );
 
-  return projects ?? null;
+  return result ?? { projects: [], totalCount: 0 };
 }
 
 interface EditProjectParams {
@@ -49,31 +71,22 @@ export async function editProject({ projectId, data }: EditProjectParams) {
   const validatedData = editProjectSchema.safeParse(data);
 
   if (!validatedData.success) {
-    const errors: Record<string, string[]> = {};
-
-    for (const issue of validatedData.error.issues) {
-      const path = issue.path.join('.');
-      if (!errors[path]) {
-        errors[path] = [];
-      }
-      errors[path].push(issue.message);
-    }
-    throw new ValidationError('Validation failed', errors);
-  } else {
-    const supabase = await createAnonClient();
-    const editProject = new EditProject(supabase);
-
-    const result = await editProject.execute({
-      projectId,
-      ...validatedData.data,
-    });
-
-    if (!result.success) {
-      throw new Error(result.message);
-    }
-
-    return result;
+    handleValidationError(validatedData.error);
   }
+
+  const supabase = await createAnonClient();
+  const editProject = new EditProject(supabase);
+
+  const result = await editProject.execute({
+    projectId,
+    ...validatedData.data,
+  });
+
+  if (!result.success) {
+    throw new Error(result.message);
+  }
+
+  return result;
 }
 
 interface UpdateProjectParams {
@@ -88,16 +101,7 @@ export async function updateProject(params: UpdateProjectParams) {
   const validatedUpdate = updateProjectSchema.safeParse(data);
 
   if (!validatedUpdate.success) {
-    const errors: Record<string, string[]> = {};
-
-    for (const issue of validatedUpdate.error.issues) {
-      const path = issue.path.join('.');
-      if (!errors[path]) {
-        errors[path] = [];
-      }
-      errors[path].push(issue.message);
-    }
-    throw new ValidationError('Validation failed', errors);
+    handleValidationError(validatedUpdate.error);
   }
 
   const supabase = await createAnonClient();

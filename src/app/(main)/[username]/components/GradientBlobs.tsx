@@ -32,9 +32,12 @@ const GradientBlobs = () => {
   };
 
   useEffect(() => {
+    const maxWidth = window.innerWidth * 0.7;
+    const maxHeight = window.innerHeight * 0.5;
+
     const positions = Array.from({ length: numBlobs }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
+      x: Math.random() * maxWidth,
+      y: Math.random() * maxHeight,
       size: Math.random() * 100 + 250,
     }));
     setBlobPositions(positions);
@@ -47,7 +50,7 @@ const GradientBlobs = () => {
         return (
           <div
             key={index}
-            className={`bg-gradient-to-r ${gradientClass} rounded-full blur-[100px] absolute -z-10 opacity-30 transition-all duration-1000`}
+            className={`bg-linear-to-r ${gradientClass} rounded-full blur-[100px] absolute -z-10 opacity-20 transition-all duration-1000 pointer-events-none`}
             style={
               {
                 '--blob-x': `${position.x}px`,
@@ -56,6 +59,8 @@ const GradientBlobs = () => {
                 transform: 'translate(var(--blob-x), var(--blob-y))',
                 width: 'var(--blob-size)',
                 height: 'var(--blob-size)',
+                maxWidth: '100%',
+                maxHeight: '100vh',
               } as React.CSSProperties
             }
           />
