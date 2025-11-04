@@ -80,7 +80,10 @@ export default async function RootLayout({
       className={`${audioWide.variable} ${raleway.variable} ${lato.variable}`}
       suppressHydrationWarning
     >
-      <body className='min-h-screen flex flex-col bg-zinc-950' suppressHydrationWarning>
+      <body
+        className='min-h-screen flex flex-col bg-zinc-950'
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute='class'
           defaultTheme='dark'

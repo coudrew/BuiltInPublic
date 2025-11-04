@@ -136,7 +136,10 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
       }
 
       // Use map instead of for loop for better performance
-      const projects = data?.map((rawProject: ProjectDTO) => this.safeTransformDTO(rawProject)) || [];
+      const projects =
+        data?.map((rawProject: ProjectDTO) =>
+          this.safeTransformDTO(rawProject)
+        ) || [];
 
       return {
         projects,

@@ -29,7 +29,7 @@ function handleValidationError(error: z.ZodError): never {
     }
     errors[path].push(issue.message);
   }
-  
+
   throw new ValidationError('Validation failed', errors);
 }
 

@@ -20,18 +20,18 @@ const PROJECTS_PER_PAGE = 6;
 export function ProjectsList() {
   const { profile, canEdit } = useProfileContext();
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const { data, isLoading } = useProjectsWithPagination(
     profile?.username || '',
     currentPage,
     PROJECTS_PER_PAGE
   );
 
-  const totalPages = useMemo(() => 
-    data ? Math.ceil(data.totalCount / PROJECTS_PER_PAGE) : 0,
+  const totalPages = useMemo(
+    () => (data ? Math.ceil(data.totalCount / PROJECTS_PER_PAGE) : 0),
     [data]
   );
-  
+
   const showPagination = totalPages > 1;
   const projects = data?.projects || [];
 
@@ -49,7 +49,7 @@ export function ProjectsList() {
 
   const getPageNumbers = useCallback(() => {
     const pages: (number | string)[] = [];
-    
+
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -58,12 +58,27 @@ export function ProjectsList() {
       if (currentPage <= 3) {
         pages.push(1, 2, 3, 4, 'ellipsis', totalPages);
       } else if (currentPage >= totalPages - 2) {
-        pages.push(1, 'ellipsis', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(
+          1,
+          'ellipsis',
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages
+        );
       } else {
-        pages.push(1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages);
+        pages.push(
+          1,
+          'ellipsis',
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          'ellipsis',
+          totalPages
+        );
       }
     }
-    
+
     return pages;
   }, [currentPage, totalPages]);
 
@@ -97,7 +112,9 @@ export function ProjectsList() {
               <PaginationPrevious
                 onClick={handlePreviousPage}
                 disabled={currentPage === 1}
-                className={currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                className={
+                  currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+                }
               />
             </PaginationItem>
 
@@ -120,7 +137,11 @@ export function ProjectsList() {
               <PaginationNext
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className={currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}
+                className={
+                  currentPage === totalPages
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                }
               />
             </PaginationItem>
           </PaginationContent>

@@ -34,7 +34,7 @@ const GradientBlobs = () => {
   useEffect(() => {
     const maxWidth = window.innerWidth * 0.7;
     const maxHeight = window.innerHeight * 0.5;
-    
+
     const positions = Array.from({ length: numBlobs }, () => ({
       x: Math.random() * maxWidth,
       y: Math.random() * maxHeight,

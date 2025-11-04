@@ -42,7 +42,8 @@ export function useProjectsWithPagination(
 ) {
   const { data, isLoading, error } = useQuery({
     queryKey: [...projectQueryKeys.username(username || ''), page, pageSize],
-    queryFn: () => getProjectsByUsernameWithPagination(username || '', page, pageSize),
+    queryFn: () =>
+      getProjectsByUsernameWithPagination(username || '', page, pageSize),
     enabled: Boolean(username),
     refetchOnMount: 'always',
     retry: 1,
