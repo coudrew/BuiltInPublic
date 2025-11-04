@@ -10,10 +10,7 @@ export default defineConfig({
     environment: 'jsdom',
     include: RLS_ONLY
       ? ['supabase/__tests__/rls-policies/**/*.{test,spec}.{ts,tsx}'] // RLS-only when enabled
-      : [
-          'src/**/*.test.{ts,tsx}',
-          'src/**/__tests__/**/*.{ts,tsx}',
-        ],
+      : ['src/**/*.test.{ts,tsx}', 'src/**/__tests__/**/*.{ts,tsx}'],
     exclude: ['node_modules', 'dist', 'coverage'],
     coverage: {
       provider: 'v8',
