@@ -106,10 +106,27 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
     }
   }
 
-  async getProjectsByUsername(username: string): Promise<Project[] | null> {
+  async getProjectsByUsernameWithPagination(
+    username: string,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<{ projects: Project[]; totalCount: number } | null> {
     try {
-      const query = this.getBaseQuery();
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
 
+      // Get total count using a separate count query with proper join
+      const { count, error: countError } = await this.supabase
+        .from('projects')
+        .select('id, profiles!inner(username)', { count: 'exact', head: true })
+        .eq('profiles.username', username);
+
+      if (countError) {
+        throw countError;
+      }
+
+      // Get paginated data
+      const query = this.getBaseQuery().range(from, to);
       const { data, error } = await this.applyFilters(query, {
         'profiles.username': username,
       });
@@ -118,19 +135,15 @@ export class ProjectRepository extends BaseRepository<ProjectDTO, Project> {
         throw error;
       }
 
-      if (!data) {
-        throw new Error('No Projects found');
-      }
+      // Use map instead of for loop for better performance
+      const projects = data?.map((rawProject: ProjectDTO) => this.safeTransformDTO(rawProject)) || [];
 
-      const projects: Project[] = [];
-
-      for (const rawProject of data) {
-        const project = this.safeTransformDTO(rawProject);
-        projects.push(project);
-      }
-
-      return projects;
+      return {
+        projects,
+        totalCount: count ?? 0,
+      };
     } catch (e) {
+      console.error('Error fetching paginated projects:', e);
       throw e;
     }
   }

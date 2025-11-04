@@ -1,10 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   editProject,
   getProjectById,
-  getProjectsByUsername,
+  getProjectsByUsernameWithPagination,
   updateProject,
   deleteProject,
 } from './actions';
@@ -19,30 +20,39 @@ const projectQueryKeys = {
   username: (username: string) => [...projectQueryKeys.all, username] as const,
 };
 
-function handleQueryError(error: Error) {
-  UINotification.error('Error fetching projects');
-}
-
 export default function useProject(projectId: string) {
   const { data, isLoading, error } = useQuery({
     queryKey: projectQueryKeys.projectId(projectId),
     queryFn: () => getProjectById(projectId),
   });
 
-  if (error) handleQueryError(error);
+  useEffect(() => {
+    if (error) {
+      UINotification.error('Error fetching project');
+    }
+  }, [error]);
 
   return { data, isLoading, error };
 }
 
-export function useProjects(username?: string) {
+export function useProjectsWithPagination(
+  username?: string,
+  page: number = 1,
+  pageSize: number = 10
+) {
   const { data, isLoading, error } = useQuery({
-    queryKey: projectQueryKeys.username(username || ''),
-    queryFn: () => getProjectsByUsername(username || ''),
+    queryKey: [...projectQueryKeys.username(username || ''), page, pageSize],
+    queryFn: () => getProjectsByUsernameWithPagination(username || '', page, pageSize),
     enabled: Boolean(username),
     refetchOnMount: 'always',
+    retry: 1,
   });
 
-  if (error) handleQueryError(error);
+  useEffect(() => {
+    if (error) {
+      UINotification.error('Error fetching projects');
+    }
+  }, [error]);
 
   return { data, isLoading, error };
 }
