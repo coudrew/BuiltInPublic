@@ -47,11 +47,12 @@ jobs:
         id: test
         run: |
           mkdir -p test-results
-          pnpm test -- \
-          --coverage \
-          --reporter=default \
-          --reporter=junit \
-          --outputFile=./test-results/junit.xml
+          pnpm vitest run \
+            --environment=jsdom \
+            --coverage \
+            --reporter=default \
+            --reporter=junit \
+            --outputFile=./test-results/junit.xml
 
       # Generate test summary
       - name: Test Summary
