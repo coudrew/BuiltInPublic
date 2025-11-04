@@ -6,14 +6,13 @@ export default defineConfig({
   plugins: [tsconfigPaths(), react()],
   test: {
     environment: 'jsdom',
-    environmentMatchGlobs: [['supabase/**', 'node']],
-    // Only include app unit tests
+    // Include both app unit tests and Supabase RLS policy tests
     include: [
       'src/**/*.test.{ts,tsx}',
       'src/**/__tests__/**/*.{ts,tsx}',
-      'supabase/__tests__/rls-policies/**/*.{test,spec}.{ts,tsx,js}',
+      'supabase/__tests__/rls-policies/**/*.{ts,tsx}',
     ],
-    // Explicitly exclude any Supabase policy tests
+    // Explicitly exclude everything else
     exclude: ['node_modules', 'dist', 'coverage'],
     coverage: {
       provider: 'v8',
