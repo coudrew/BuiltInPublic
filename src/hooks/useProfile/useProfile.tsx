@@ -34,26 +34,30 @@ export default function useProfile(username: string) {
 const useUpdateProfile = (): UseMutationResult<
   { success: boolean; message: string },
   Error,
-  UserProfileUpdateData
+  UserProfileUpdateData,
+  unknown
 > => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: (fields: UserProfileUpdateData) => updateProfile(fields),
-    onSuccess: () => {
+  return useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: profileQueryKeys.all });
-      UINotification.success('Profile updated successfully');
-    },
-    onError: (error: Error) => {
-      if (error instanceof ValidationError) {
-        // let onSettled handle validation errors
-        return;
+      if (data.success) {
+        UINotification.success(data.message || 'Profile updated successfully');
       }
-      UINotification.error('Error updating profile');
+    },
+    onError: (error) => {
+      if (error instanceof ValidationError) {
+        const validationErrors = Object.values(error.validationErrors)
+          .flat()
+          .join(', ');
+        UINotification.error(validationErrors);
+      } else {
+        UINotification.error(error.message || 'Failed to update profile');
+      }
     },
   });
-
-  return mutation;
 };
 
 export { useUpdateProfile };

@@ -41,7 +41,8 @@ Before getting started, make sure you have the following installed:
 │       ├── prettier.yml
 │       ├── push-migrations-prod.yml
 │       ├── push-migrations-staging.yml
-│       ├── renovate.yml
+│       ├── renovate-lockfile-gate.yml
+│       ├── renovate-lockfile-pr.yml
 │       ├── semgrep.yml
 │       ├── syft.yml
 │       └── unit-tests.yml
@@ -87,13 +88,11 @@ Before getting started, make sure you have the following installed:
 ├── LICENSE
 ├── next-env.d.ts
 ├── next.config.mjs
-├── package-lock.json
 ├── package.json
+├── pnpm-lock.yaml
 ├── postcss.config.mjs
 ├── public
-│   ├── .DS_Store
 │   ├── 404
-│   │   ├── .DS_Store
 │   │   ├── funny1.png
 │   │   ├── funny10.png
 │   │   ├── funny2.png
@@ -133,16 +132,48 @@ Before getting started, make sure you have the following installed:
 │   ├── app
 │   │   ├── (main)
 │   │   │   ├── [username]
+│   │   │   │   ├── components
+│   │   │   │   │   ├── FeedSection.tsx
+│   │   │   │   │   ├── GradientBlobs.tsx
+│   │   │   │   │   ├── StreakSection.tsx
+│   │   │   │   │   └── UserInfo.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── profile.css
+│   │   │   │   └── project
+│   │   │   │       ├── [id]
+│   │   │   │       │   └── page.tsx
+│   │   │   │       └── page.tsx
 │   │   │   ├── dashboard
+│   │   │   │   ├── feed
+│   │   │   │   │   ├── Feed.tsx
+│   │   │   │   │   └── Likes.tsx
+│   │   │   │   ├── friends-projects
+│   │   │   │   │   └── FriendsProjects.tsx
+│   │   │   │   ├── groups
+│   │   │   │   │   └── Groups.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── profile
+│   │   │   │   │   └── Profile.tsx
+│   │   │   │   ├── projects
+│   │   │   │   │   └── ProjectList.tsx
+│   │   │   │   └── stats
+│   │   │   │       └── Stats.tsx
 │   │   │   ├── layout.tsx
 │   │   │   └── onboarding
+│   │   │       ├── onboarding-form
+│   │   │       │   ├── actions.ts
+│   │   │       │   ├── onboarding-form.schema.ts
+│   │   │       │   └── OnboardingForm.tsx
+│   │   │       └── page.tsx
 │   │   ├── about
 │   │   │   └── page.tsx
 │   │   ├── auth
 │   │   │   ├── actions.ts
 │   │   │   ├── callback
+│   │   │   │   └── route.ts
 │   │   │   ├── DevSignIn.tsx
 │   │   │   ├── oauth
+│   │   │   │   └── route.ts
 │   │   │   └── page.tsx
 │   │   ├── favicon.ico
 │   │   ├── globals.css
@@ -151,6 +182,7 @@ Before getting started, make sure you have the following installed:
 │   │   ├── page.tsx
 │   │   ├── project
 │   │   │   └── [id]
+│   │   │       └── page.tsx
 │   │   ├── staging-auth
 │   │   │   ├── actions.ts
 │   │   │   ├── page.tsx
@@ -167,14 +199,28 @@ Before getting started, make sure you have the following installed:
 │   │   ├── Navbar
 │   │   │   ├── index.ts
 │   │   │   └── Navbar.tsx
+│   │   ├── Policy
+│   │   │   └── DisplayDocumentDialog.tsx
 │   │   ├── Profile
 │   │   │   ├── Bio.tsx
 │   │   │   └── DisplayName.tsx
 │   │   ├── ProfileIcon.tsx
 │   │   ├── Projects
 │   │   │   ├── CreateProject
+│   │   │   │   ├── actions.ts
+│   │   │   │   ├── createProject.schema.ts
+│   │   │   │   └── CreateProjectButton.tsx
 │   │   │   ├── ProjectCard.tsx
 │   │   │   ├── ProjectPanel
+│   │   │   │   ├── ProjectDeleteButton.tsx
+│   │   │   │   ├── ProjectDescription.tsx
+│   │   │   │   ├── ProjectDisplayPanel.tsx
+│   │   │   │   ├── ProjectEditPanel.tsx
+│   │   │   │   ├── ProjectPanel.tsx
+│   │   │   │   ├── ProjectStatusDropdown.tsx
+│   │   │   │   ├── ProjectTitle.tsx
+│   │   │   │   ├── ProjectUpdateButton.tsx
+│   │   │   │   └── ProjectVisibilityDropdown.tsx
 │   │   │   ├── ProjectsList.tsx
 │   │   │   ├── ProjectStatusBadge.tsx
 │   │   │   ├── ProjectUpdateCard.tsx
@@ -184,21 +230,24 @@ Before getting started, make sure you have the following installed:
 │   │   │   ├── ProjectProvider.tsx
 │   │   │   ├── QueryProvider.tsx
 │   │   │   └── ThemeProvider.tsx
-│   │   └── ui
-│   │       ├── avatar.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── checkbox.tsx
-│   │       ├── confirmation-dialog.tsx
-│   │       ├── dialog.tsx
-│   │       ├── dropdown-menu.tsx
-│   │       ├── form.tsx
-│   │       ├── input.tsx
-│   │       ├── label.tsx
-│   │       ├── modal.tsx
-│   │       ├── skeleton.tsx
-│   │       └── textarea.tsx
+│   │   ├── ui
+│   │   │   ├── avatar.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── checkbox.tsx
+│   │   │   ├── confirmation-dialog.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   └── textarea.tsx
+│   │   └── WaitlistForm.tsx
 │   ├── hooks
+│   │   ├── usePolicy
+│   │   │   ├── actions.ts
+│   │   │   └── usePolicyDocument.ts
 │   │   ├── useProfile
 │   │   │   ├── actions.ts
 │   │   │   ├── profile.schema.ts
@@ -212,13 +261,11 @@ Before getting started, make sure you have the following installed:
 │   │       ├── actions.ts
 │   │       └── useUser.tsx
 │   ├── lib
+│   │   ├── mailchimp.ts
 │   │   └── utils.ts
 │   ├── middleware.ts
 │   ├── repositories
 │   │   ├── base.repository.ts
-│   │   ├── policyDocumentRepository
-│   │   │   ├── policyDocument.repository.ts
-│   │   │   └── policyDocument.types.ts
 │   │   ├── policyRepository
 │   │   │   ├── policy.repository.ts
 │   │   │   └── policy.types.ts
@@ -238,15 +285,22 @@ Before getting started, make sure you have the following installed:
 │       ├── BaseMutationUseCase.ts
 │       ├── projects
 │       │   ├── __tests__
+│       │   │   ├── CreateNewProject.test.ts
+│       │   │   ├── DeleteProject.test.ts
+│       │   │   ├── EditProject.test.ts
+│       │   │   └── UpdateProject.test.ts
 │       │   ├── CreateNewProject.ts
+│       │   ├── DeleteProject.ts
 │       │   ├── EditProject.ts
 │       │   ├── GetProject.ts
 │       │   └── UpdateProject.ts
 │       ├── updateUserProfile
 │       │   ├── __tests__
+│       │   │   └── UpdateUserProfile.test.ts
 │       │   └── UpdateUserProfile.ts
 │       └── userConsent
 │           ├── __tests__
+│           │   └── UserConsent.test.ts
 │           └── UserConsent.ts
 ├── supabase
 │   ├── __tests__
@@ -256,8 +310,6 @@ Before getting started, make sure you have the following installed:
 │   │   │   └── projects.test.ts
 │   │   ├── testClients.ts
 │   │   └── testUser.ts
-│   ├── .branches
-│   │   └── _current_branch
 │   ├── .gitignore
 │   ├── .temp
 │   │   └── cli-latest
@@ -283,7 +335,8 @@ Before getting started, make sure you have the following installed:
 │   │   ├── 20250829201136_user_consent_tables.sql
 │   │   ├── 20250830223716_private_profile.sql
 │   │   ├── 20250905144832_usage_on_policy_docs.sql
-│   │   └── 20250907141731_policy_doc_triggers.sql
+│   │   ├── 20250907141731_policy_doc_triggers.sql
+│   │   └── 20251018114100_add_images_table.sql
 │   ├── seed.sql
 │   └── supabase.types.ts
 ├── tsconfig.json

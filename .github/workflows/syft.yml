@@ -1,4 +1,3 @@
-# .github/workflows/sbom-syft.yml
 name: Generate SBOM with Syft
 
 on:
@@ -20,13 +19,19 @@ jobs:
       - name: ⬇️ Checkout Repo
         uses: actions/checkout@v5
 
-      - name: 🧰 Setup Node (optional if you're scanning Node project)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: 🧰 Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: '22'
+          cache: 'pnpm'
 
       - name: 📦 Install Dependencies (optional, improves scan)
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🔍 Generate SBOM with Syft
         uses: anchore/sbom-action@v0.17.2
@@ -43,7 +48,6 @@ jobs:
           else
             NAME="BuiltInPublic-${{ github.ref_name }}.spdx.json"
           fi
-
           mv BuiltInPublic.spdx.json "$NAME"
           echo "filename=$NAME" >> "$GITHUB_OUTPUT"
 

@@ -1,17 +1,17 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   editProject,
   getProjectById,
-  getProjectsByUsername,
+  getProjectsByUsernameWithPagination,
   updateProject,
   deleteProject,
 } from './actions';
 import { createProject } from '@/components/Projects/CreateProject/actions';
 import UINotification from '@/services/UINotification.service';
 import { ValidationError } from 'utils/errors/ValidationError';
-import { Variable } from 'lucide-react';
 
 const projectQueryKeys = {
   all: ['project'] as const,
@@ -26,44 +26,76 @@ export default function useProject(projectId: string) {
     queryFn: () => getProjectById(projectId),
   });
 
-  if (error) {
-    UINotification.error('Error fetching projects');
-  }
+  useEffect(() => {
+    if (error) {
+      UINotification.error('Error fetching project');
+    }
+  }, [error]);
 
   return { data, isLoading, error };
 }
 
-export function useProjects(username?: string) {
+export function useProjectsWithPagination(
+  username?: string,
+  page: number = 1,
+  pageSize: number = 10
+) {
   const { data, isLoading, error } = useQuery({
-    queryKey: projectQueryKeys.username(username || ''),
-    queryFn: () => getProjectsByUsername(username || ''),
+    queryKey: [...projectQueryKeys.username(username || ''), page, pageSize],
+    queryFn: () =>
+      getProjectsByUsernameWithPagination(username || '', page, pageSize),
     enabled: Boolean(username),
+    refetchOnMount: 'always',
+    retry: 1,
   });
 
-  if (error) {
-    UINotification.error('Error fetching projects');
-  }
+  useEffect(() => {
+    if (error) {
+      UINotification.error('Error fetching projects');
+    }
+  }, [error]);
 
   return { data, isLoading, error };
 }
 
-export function useEditProject(projectId: string) {
+export function useEditProject() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: editProject,
-    onError: (error) => {
-      if (error instanceof ValidationError) {
-        // let onSettled handle validation errors
-        return;
-      }
-      UINotification.error(error.message);
+    onMutate: async ({ projectId }) => {
+      await queryClient.cancelQueries({
+        queryKey: projectQueryKeys.projectId(projectId),
+      });
+
+      const previousProject = queryClient.getQueryData(
+        projectQueryKeys.projectId(projectId)
+      );
+
+      return { previousProject, projectId };
     },
-    onSuccess: (result) => {
-      UINotification.success(result.message);
+
+    onSuccess: () => {
+      UINotification.success('Project updated successfully');
+    },
+
+    onError: (error, _variables, context) => {
+      if (context?.previousProject) {
+        queryClient.setQueryData(
+          projectQueryKeys.projectId(context.projectId),
+          context.previousProject
+        );
+      }
+
+      if (error instanceof ValidationError) return;
+      UINotification.error(error.message || 'Failed to update project');
+    },
+
+    onSettled: (_data, _error, { projectId }) => {
       queryClient.invalidateQueries({
         queryKey: projectQueryKeys.projectId(projectId),
       });
+      queryClient.invalidateQueries({ queryKey: projectQueryKeys.all });
     },
   });
 
@@ -75,6 +107,11 @@ export function useCreateProject() {
 
   const mutation = useMutation({
     mutationFn: createProject,
+    onSuccess: (_result, { username }) => {
+      queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.username(username),
+      });
+    },
     onError: (error) => {
       if (error.message === 'NEXT_REDIRECT') {
         queryClient.invalidateQueries({
@@ -82,16 +119,9 @@ export function useCreateProject() {
           exact: false,
         });
         return;
-      } else if (error instanceof ValidationError) {
-        // let onSettled handle validation errors
-        return;
       }
+      if (error instanceof ValidationError) return;
       UINotification.error(error.message);
-    },
-    onSuccess: (result, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: projectQueryKeys.username(variables.username),
-      });
     },
   });
 
@@ -103,18 +133,17 @@ export function useUpdateProject(projectId: string) {
 
   const mutation = useMutation({
     mutationFn: updateProject,
-    onError: (error) => {
-      if (error instanceof ValidationError) {
-        // let onSettled handle the validation errors
-        return;
-      }
-      UINotification.error(error.message);
-    },
     onSuccess: (result) => {
-      UINotification.success(result.message);
+      if (result?.message) {
+        UINotification.success(result.message);
+      }
       queryClient.invalidateQueries({
         queryKey: projectQueryKeys.projectId(projectId),
       });
+    },
+    onError: (error) => {
+      if (error instanceof ValidationError) return;
+      UINotification.error(error.message);
     },
   });
 
@@ -126,27 +155,27 @@ export function useDeleteProject() {
 
   const mutation = useMutation({
     mutationFn: deleteProject,
-    onError: (error, variables) => {
-      if (error.message !== 'NEXT_REDIRECT') {
-        UINotification.error(error.message);
-      } else {
-        queryClient.removeQueries({
-          queryKey: projectQueryKeys.projectId(variables.projectId),
-        });
-        queryClient.invalidateQueries({
-          queryKey: projectQueryKeys.all,
-          exact: false,
-        });
-      }
-    },
-    onSuccess: (result, variables) => {
+    onSuccess: (_result, { projectId }) => {
       queryClient.removeQueries({
-        queryKey: projectQueryKeys.projectId(variables.projectId),
+        queryKey: projectQueryKeys.projectId(projectId),
       });
       queryClient.invalidateQueries({
         queryKey: projectQueryKeys.all,
         exact: false,
       });
+    },
+    onError: (error, { projectId }) => {
+      if (error.message === 'NEXT_REDIRECT') {
+        queryClient.removeQueries({
+          queryKey: projectQueryKeys.projectId(projectId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: projectQueryKeys.all,
+          exact: false,
+        });
+        return;
+      }
+      UINotification.error(error.message);
     },
   });
 

@@ -10,6 +10,8 @@ export interface UpdateProjectParams {
   status?: Database['public']['Enums']['project_status'];
   description?: string;
   external_url?: string;
+  primaryImage?: string;
+  galleryImages?: string[];
 }
 
 export class EditProject extends BaseMutationUseCase<UpdateProjectParams> {
@@ -20,6 +22,8 @@ export class EditProject extends BaseMutationUseCase<UpdateProjectParams> {
     status,
     description,
     external_url,
+    primaryImage,
+    galleryImages,
   }: UpdateProjectParams): Promise<{ success: boolean; message: string }> {
     const sanitizedName = name
       ? xss(name, {
@@ -54,13 +58,30 @@ export class EditProject extends BaseMutationUseCase<UpdateProjectParams> {
     }
 
     try {
-      const update = this.compactUpdateData({
+      const updateData: any = {
         name: sanitizedName,
         description: sanitizedDescription,
         external_url: validatedUrl,
         visibility,
         status,
-      });
+      };
+
+      // Map camelCase to snake_case for database columns
+      if (primaryImage !== undefined) {
+        updateData.primary_image = primaryImage;
+      }
+      if (galleryImages !== undefined) {
+        updateData.gallery_images = galleryImages;
+      }
+
+      // Remove undefined values
+      const update = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
+
+      if (!Object.keys(update).length) {
+        return { success: false, message: 'No fields to update' };
+      }
 
       const { error } = await this.supabase
         .from('projects')

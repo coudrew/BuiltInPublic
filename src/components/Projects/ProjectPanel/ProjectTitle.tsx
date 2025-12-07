@@ -33,7 +33,7 @@ interface ProjectTitleFormProps {
 
 function ProjectTitleForm({ stopEditing }: ProjectTitleFormProps) {
   const { name, id } = useProjectContext();
-  const mutation = useEditProject(id);
+  const mutation = useEditProject();
 
   const form = useForm<EditProjectSchema>({
     resolver: zodResolver(editProjectSchema),

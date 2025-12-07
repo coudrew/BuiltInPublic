@@ -34,6 +34,7 @@ export async function updateProfile({
   id,
   bio,
   display_name,
+  avatar_url,
 }: UserProfileUpdateData) {
   // Only validate display_name if it's provided and not empty
   if (display_name) {
@@ -81,6 +82,7 @@ export async function updateProfile({
     id,
     bio,
     display_name,
+    avatar_url,
   });
 
   if (!result.success) {
