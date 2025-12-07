@@ -58,19 +58,19 @@ fi
 echo -e "✅ No empty files found.\n"
 
 # 1. Format check & fix
-echo "🎨 Running Prettier..."
-CHANGED_FILES=$(npx prettier --config .prettierrc.yml --write --list-different .)
-if [ -n "$CHANGED_FILES" ]; then
-  echo -e "💾 Prettier made changes to the following files:\n"
-  echo -e "$CHANGED_FILES\n"
-  git add $CHANGED_FILES
-  git commit -m "style: auto-format code with Prettier [skip-precheck]"
+# echo "🎨 Running Prettier..."
+# CHANGED_FILES=$(npx prettier --config .prettierrc.yml --write --list-different .)
+# if [ -n "$CHANGED_FILES" ]; then
+#   echo -e "💾 Prettier made changes to the following files:\n"
+#   echo -e "$CHANGED_FILES\n"
+#   git add $CHANGED_FILES
+#   git commit -m "style: auto-format code with Prettier [skip-precheck]"
 
-  echo -e "🛑 Formatting changes committed. Please review and push again.\n"
-  exit 1
-else
-  echo -e "✅ Prettier passed.\n"
-fi
+#   echo -e "🛑 Formatting changes committed. Please review and push again.\n"
+#   exit 1
+# else
+#   echo -e "✅ Prettier passed.\n"
+# fi
 
 # 2. ESLint check & fix
 echo "🧹 Running ESLint..."

@@ -1,30 +1,30 @@
-# name: Prettier Formatting Check
+name: Prettier Formatting Check
 
-# on:
-#   pull_request:
-#     branches: [main, development]
+on:
+  pull_request:
+    branches: [main, development]
 
-# jobs:
-#   prettier:
-#     runs-on: ubuntu-latest
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-#       - name: Setup pnpm
-#         uses: pnpm/action-setup@v4
-#         with:
-#           version: 10.0.0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
 
-#       - name: Set up Node
-#         uses: actions/setup-node@v5
-#         with:
-#           node-version: '22'
-#           cache: 'pnpm'
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'pnpm'
 
-#       - name: Install dependencies
-#         run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-#       - name: Run Prettier
-#         run: pnpx prettier --config .prettierrc.yml --check . --ignore-path .prettierignore
+      - name: Run Prettier
+        run: pnpx prettier --config .prettierrc.yml --check . --ignore-path .prettierignore
